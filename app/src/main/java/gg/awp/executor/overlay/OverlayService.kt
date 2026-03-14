@@ -42,6 +42,16 @@ class OverlayService : Service() {
         const val OVERLAY_H_DP = 480
         const val HTTP_PORT = 8080
         const val AUTOEXEC_FILE = ".AWP_SESSION.lua"
+
+        val KNOWN_EXECUTOR_PATHS = listOf(
+            "Delta"     to listOf("Delta/Scripts", "Delta/Autoexecute", "Delta/workspace"),
+            "Hydrogen"  to listOf("Hydrogen/scripts", "Hydrogen/autoexec", "Hydrogen/workspace"),
+            "Fluxus"    to listOf("Fluxus/scripts", "Fluxus/autoexec", "Fluxus/workspace"),
+            "Codex"     to listOf("Codex/scripts", "Codex/autoexec", "Codex/workspace"),
+            "Arceus"    to listOf("AceusX/scripts", "AceusX/autoexec"),
+            "Solara"    to listOf("Solara/scripts", "Solara/autoexec"),
+            "Wave"      to listOf("Wave/scripts",   "Wave/autoexec"),
+        )
     }
 
     private lateinit var wm: WindowManager
@@ -54,33 +64,40 @@ class OverlayService : Service() {
     private var initialY = 0
     private var initialTouchX = 0f
     private var initialTouchY = 0f
+    private var isLocked = false
+
+    private var initialW = 0
+    private var initialH = 0
+    private var resizeTouchX = 0f
+    private var resizeTouchY = 0f
+    private var isResizing = false
+
+    private var detectedExecutorName = "Unknown"
+    private var detectedScriptsPath = ""
+    private var detectedAutoexecPath = ""
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun dpToPx(dp: Int): Int =
         (dp * resources.displayMetrics.density).toInt()
 
-    private fun getScreenSize(): Pair<Int, Int> {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val bounds = wm.currentWindowMetrics.bounds
-            Pair(bounds.width(), bounds.height())
+    private fun getScreenSize(): Pair<Int, Int> =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val b = wm.currentWindowMetrics.bounds
+            Pair(b.width(), b.height())
         } else {
             val dm = DisplayMetrics()
-            @Suppress("DEPRECATION")
-            wm.defaultDisplay.getMetrics(dm)
+            @Suppress("DEPRECATION") wm.defaultDisplay.getMetrics(dm)
             Pair(dm.widthPixels, dm.heightPixels)
         }
-    }
 
     private fun getLocalIp(): String {
         try {
             val ifaces = NetworkInterface.getNetworkInterfaces() ?: return "127.0.0.1"
-            for (iface in ifaces) {
-                for (addr in iface.inetAddresses) {
+            for (iface in ifaces)
+                for (addr in iface.inetAddresses)
                     if (!addr.isLoopbackAddress && addr.hostAddress?.contains('.') == true)
                         return addr.hostAddress ?: "127.0.0.1"
-                }
-            }
         } catch (_: Exception) {}
         return "127.0.0.1"
     }
@@ -90,15 +107,34 @@ class OverlayService : Service() {
         return "loadstring(game:HttpGet(\"http://$ip:$HTTP_PORT/session/script\"))()"
     }
 
+    private fun detectExecutor() {
+        val base = Environment.getExternalStorageDirectory()
+        for ((name, paths) in KNOWN_EXECUTOR_PATHS) {
+            val scriptsCandidate = paths.firstOrNull { it.contains("script", ignoreCase = true) } ?: continue
+            if (File(base, scriptsCandidate).exists()) {
+                detectedExecutorName = name
+                detectedScriptsPath = "/sdcard/$scriptsCandidate"
+                val autoCandidate = paths.firstOrNull { it.contains("auto", ignoreCase = true) } ?: ""
+                detectedAutoexecPath = if (autoCandidate.isNotEmpty()) "/sdcard/$autoCandidate" else ""
+                return
+            }
+        }
+        detectedScriptsPath = "/sdcard/Delta/Scripts"
+        detectedAutoexecPath = "/sdcard/Delta/Autoexecute"
+    }
+
     private fun writeAutoexecSession() {
         try {
-            val dir = File(Environment.getExternalStorageDirectory(), "Delta/Autoexecute")
+            val dir = if (detectedAutoexecPath.isNotEmpty())
+                File(detectedAutoexecPath)
+            else
+                File(Environment.getExternalStorageDirectory(), "Delta/Autoexecute")
             if (!dir.exists()) dir.mkdirs()
             File(dir, AUTOEXEC_FILE).writeText(buildLoadstring())
         } catch (_: Exception) {}
     }
 
-    private fun copyLoadstringToClipboard() {
+    private fun copyToClipboard() {
         try {
             val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             cm.setPrimaryClip(ClipData.newPlainText("AWP", buildLoadstring()))
@@ -118,11 +154,12 @@ class OverlayService : Service() {
 
         val overlayW = minOf(dpToPx(OVERLAY_W_DP), screenW)
         val overlayH = minOf(dpToPx(OVERLAY_H_DP), screenH)
+        initialW = overlayW
+        initialH = overlayH
 
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        else
-            @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
+        else @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
 
         params = WindowManager.LayoutParams(
             overlayW, overlayH, type,
@@ -151,11 +188,12 @@ class OverlayService : Service() {
         startForeground(NOTIF_ID, buildNotification())
         observeModel()
 
+        detectExecutor()
         writeAutoexecSession()
-        copyLoadstringToClipboard()
+        copyToClipboard()
     }
 
-    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
+    @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         wv.settings.apply {
             javaScriptEnabled = true
@@ -177,24 +215,47 @@ class OverlayService : Service() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupDrag() {
         wv.setOnTouchListener { _, event ->
+            if (isLocked) return@setOnTouchListener false
+
+            val p = params ?: return@setOnTouchListener false
+            val w = p.width
+            val h = p.height
+            val edgeSize = dpToPx(24)
+            val inResizeZone = event.x > w - edgeSize && event.y > h - edgeSize
+
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    initialX = params!!.x
-                    initialY = params!!.y
-                    initialTouchX = event.rawX
-                    initialTouchY = event.rawY
+                    initialX = p.x; initialY = p.y
+                    initialTouchX = event.rawX; initialTouchY = event.rawY
+                    if (inResizeZone) {
+                        isResizing = true
+                        initialW = w; initialH = h
+                        resizeTouchX = event.rawX; resizeTouchY = event.rawY
+                    } else {
+                        isResizing = false
+                    }
                     false
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    val dx = (event.rawX - initialTouchX).toInt()
-                    val dy = (event.rawY - initialTouchY).toInt()
-                    if (kotlin.math.abs(dx) > 12 || kotlin.math.abs(dy) > 12) {
-                        params!!.x = initialX + dx
-                        params!!.y = initialY + dy
-                        wm.updateViewLayout(overlayView, params)
+                    if (isResizing) {
+                        val (screenW, screenH) = getScreenSize()
+                        val minW = dpToPx(280); val minH = dpToPx(220)
+                        val newW = (initialW + (event.rawX - resizeTouchX).toInt()).coerceIn(minW, screenW)
+                        val newH = (initialH + (event.rawY - resizeTouchY).toInt()).coerceIn(minH, screenH)
+                        p.width = newW; p.height = newH
+                        try { wm.updateViewLayout(overlayView, p) } catch (_: Exception) {}
                         true
-                    } else false
+                    } else {
+                        val dx = (event.rawX - initialTouchX).toInt()
+                        val dy = (event.rawY - initialTouchY).toInt()
+                        if (kotlin.math.abs(dx) > 10 || kotlin.math.abs(dy) > 10) {
+                            p.x = initialX + dx; p.y = initialY + dy
+                            try { wm.updateViewLayout(overlayView, p) } catch (_: Exception) {}
+                            true
+                        } else false
+                    }
                 }
+                MotionEvent.ACTION_UP -> { isResizing = false; false }
                 else -> false
             }
         }
@@ -212,6 +273,15 @@ class OverlayService : Service() {
         model.outputLog.observeForever { logs ->
             if (logs.isNotEmpty()) {
                 val raw = logs.last()
+                if (raw.startsWith("__meta:")) {
+                    val json = escJs(raw.removePrefix("__meta:"))
+                    wv.post {
+                        wv.evaluateJavascript(
+                            "window.dispatchEvent(new CustomEvent('awp:meta',{detail:$json}))", null
+                        )
+                    }
+                    return@observeForever
+                }
                 val colonIdx = raw.indexOf(":")
                 val type: String
                 val content: String
@@ -219,8 +289,7 @@ class OverlayService : Service() {
                     type = raw.substring(0, colonIdx)
                     content = raw.substring(colonIdx + 1)
                 } else {
-                    type = "print"
-                    content = raw
+                    type = "print"; content = raw
                 }
                 val safe = escJs(content)
                 wv.post {
@@ -234,26 +303,21 @@ class OverlayService : Service() {
     }
 
     private fun escJs(s: String) = s
-        .replace("\\", "\\\\")
-        .replace("'", "\\'")
-        .replace("\n", "\\n")
-        .replace("\r", "")
+        .replace("\\", "\\\\").replace("'", "\\'")
+        .replace("\n", "\\n").replace("\r", "")
 
     private fun getDeltaDir(): File =
         File(Environment.getExternalStorageDirectory(), "Delta")
 
-    private fun readDeltaFolder(sub: String): String {
-        val dir = File(getDeltaDir(), sub)
+    private fun readFolder(path: String): String {
+        val dir = File(path)
         if (!dir.exists() || !dir.isDirectory) return "[]"
         val arr = JSONArray()
         dir.listFiles()
             ?.filter { it.isFile && it.extension in listOf("lua", "luau", "txt") }
             ?.sortedBy { it.name }
             ?.forEach { f ->
-                arr.put(JSONObject().apply {
-                    put("name", f.name)
-                    put("content", f.readText())
-                })
+                arr.put(JSONObject().apply { put("name", f.name); put("content", f.readText()) })
             }
         return arr.toString()
     }
@@ -263,22 +327,17 @@ class OverlayService : Service() {
         @JavascriptInterface fun clearOutput() = model.clearOutput()
         @JavascriptInterface fun isConnected(): Boolean = model.isConnected.value == true
 
-        @JavascriptInterface fun minimize() {
-            wv.post { overlayView.visibility = View.GONE }
-        }
+        @JavascriptInterface fun minimize() { wv.post { overlayView.visibility = View.GONE } }
+        @JavascriptInterface fun maximize() { wv.post { overlayView.visibility = View.VISIBLE } }
+        @JavascriptInterface fun closeApp() { wv.post { stopSelf() } }
 
-        @JavascriptInterface fun maximize() {
-            wv.post { overlayView.visibility = View.VISIBLE }
-        }
-
-        @JavascriptInterface fun closeApp() {
-            wv.post { stopSelf() }
-        }
+        @JavascriptInterface fun setLocked(locked: Boolean) { isLocked = locked }
+        @JavascriptInterface fun isLocked(): Boolean = isLocked
 
         @JavascriptInterface fun reattach() {
+            detectExecutor()
             writeAutoexecSession()
-            copyLoadstringToClipboard()
-            model.executeScript("")
+            copyToClipboard()
         }
 
         @JavascriptInterface fun setTopmost(on: Boolean) {
@@ -296,15 +355,21 @@ class OverlayService : Service() {
         @JavascriptInterface fun clearAppState() {}
 
         @JavascriptInterface fun getLoadstring(): String = buildLoadstring()
+        @JavascriptInterface fun getDetectedExecutor(): String = detectedExecutorName
+        @JavascriptInterface fun getScriptsPath(): String = detectedScriptsPath
+        @JavascriptInterface fun getAutoexecPath(): String = detectedAutoexecPath
 
-        @JavascriptInterface fun getWorkspaceFiles(): String = readDeltaFolder("Scripts")
-        @JavascriptInterface fun getAutoexecFiles(): String = readDeltaFolder("Autoexecute")
+        @JavascriptInterface fun getWorkspaceFiles(): String =
+            readFolder(if (detectedScriptsPath.isNotEmpty()) detectedScriptsPath
+                       else "/sdcard/Delta/Scripts")
+
+        @JavascriptInterface fun getAutoexecFiles(): String =
+            readFolder(if (detectedAutoexecPath.isNotEmpty()) detectedAutoexecPath
+                       else "/sdcard/Delta/Autoexecute")
 
         @JavascriptInterface fun saveWorkspaceFile(name: String, content: String) {
             try {
-                val ws = File(getDeltaDir(), "workspace/AWPM").also {
-                    if (!it.exists()) it.mkdirs()
-                }
+                val ws = File(getDeltaDir(), "workspace/AWPM").also { if (!it.exists()) it.mkdirs() }
                 File(ws, name).writeText(content)
             } catch (_: Exception) {}
         }
@@ -315,11 +380,10 @@ class OverlayService : Service() {
         @JavascriptInterface fun openFolder(path: String) {
             try {
                 File(path).mkdirs()
-                val intent = Intent(Intent.ACTION_VIEW).apply {
+                startActivity(Intent(Intent.ACTION_VIEW).apply {
                     data = Uri.parse("file://$path")
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                startActivity(intent)
+                })
             } catch (_: Exception) {}
         }
     }
@@ -328,9 +392,8 @@ class OverlayService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
                 .createNotificationChannel(
-                    NotificationChannel(
-                        NOTIF_CHANNEL, "AWP Overlay", NotificationManager.IMPORTANCE_LOW
-                    ).apply { description = "AWP floating window" }
+                    NotificationChannel(NOTIF_CHANNEL, "AWP Overlay", NotificationManager.IMPORTANCE_LOW)
+                        .apply { description = "AWP floating window" }
                 )
         }
         val showIntent = PendingIntent.getService(
@@ -344,23 +407,19 @@ class OverlayService : Service() {
                 .setContentText("Toque para mostrar a janela")
                 .setSmallIcon(android.R.drawable.ic_menu_view)
                 .setContentIntent(showIntent)
-                .setOngoing(true)
-                .build()
+                .setOngoing(true).build()
         } else {
             @Suppress("DEPRECATION")
             Notification.Builder(this)
                 .setContentTitle("AWP.GG")
                 .setContentText("Toque para mostrar a janela")
                 .setSmallIcon(android.R.drawable.ic_menu_view)
-                .setOngoing(true)
-                .build()
+                .setOngoing(true).build()
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == "SHOW_OVERLAY") {
-            overlayView.visibility = View.VISIBLE
-        }
+        if (intent?.action == "SHOW_OVERLAY") overlayView.visibility = View.VISIBLE
         return START_STICKY
     }
 
