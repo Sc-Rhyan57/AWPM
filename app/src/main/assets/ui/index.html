@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AWP.GG</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg0:#0d0d0d;--bg1:#141414;--bg2:#1a1a1a;--bg3:#202020;--bg4:#272727;
+  --b1:#2c2c2c;--b2:#333;--b3:#3d3d3d;
+  --t1:#d4d4d4;--t2:#888;--t3:#555;
+  --green:#4ec94e;--red:#e05555;--blue:#4a9eff;--yellow:#e2c96e;--orange:#e09050;
+  --btn:#232323;--bth:#2d2d2d;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--t1)}
+.app{display:flex;flex-direction:column;height:100vh}
+
+.tbar{display:flex;align-items:center;justify-content:space-between;height:38px;padding:0 10px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0;user-select:none}
+.tbl{display:flex;align-items:center;gap:8px}
+.brand{font-weight:700;font-size:14px;letter-spacing:.3px}
+.brand b{color:var(--t3);font-weight:400}
+.sep{color:var(--b2)}
+.tmenu{position:relative}
+.tmbtn{display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--t2);font-size:12px;padding:3px 7px;border-radius:4px;cursor:pointer;transition:all .12s}
+.tmbtn:hover,.tmbtn.open{color:var(--t1);background:var(--bg3)}
+.tmbtn svg{width:13px;height:13px}
+.tmbtn .arr{transition:transform .15s}
+.tmbtn.open .arr{transform:rotate(180deg)}
+.drop{position:absolute;top:calc(100%+4px);left:0;background:var(--bg2);border:1px solid var(--b2);border-radius:6px;min-width:130px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;overflow:hidden}
+.drop.show{display:block}
+.ditem{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:12px;color:var(--t2);transition:all .1s}
+.ditem:hover{background:var(--bg3);color:var(--t1)}
+.ditem.active{color:var(--t1)}
+.tbr{display:flex;align-items:center;gap:6px}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--t3);transition:background .3s;flex-shrink:0}
+.sdot.on{background:var(--green)}
+.wc{display:flex;gap:2px}
+.wcb{width:26px;height:26px;border:none;background:none;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .1s}
+.wcb:hover{background:var(--bg3);color:var(--t1)}
+.wcb.x:hover{background:var(--red);color:#fff}
+.wcb svg{width:11px;height:11px}
+
+.main{display:flex;flex:1;overflow:hidden}
+.sb{width:40px;background:var(--bg1);border-right:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px;flex-shrink:0}
+.sbb{width:28px;height:28px;border:none;background:none;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .12s}
+.sbb:hover,.sbb.active{color:var(--t1);background:var(--bg3)}
+.sbb svg{width:15px;height:15px}
+.content{flex:1;display:flex;overflow:hidden}
+.view{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.view.hidden{display:none}
+
+.earea{flex:1;display:flex;overflow:hidden}
+.epane{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--b1)}
+
+.tbar2{display:flex;align-items:center;height:34px;background:var(--bg1);border-bottom:1px solid var(--b1);padding:0 6px;gap:2px;flex-shrink:0;overflow-x:auto;overflow-y:hidden}
+.tbar2::-webkit-scrollbar{height:2px}
+.tbar2::-webkit-scrollbar-thumb{background:var(--b2)}
+.tab{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:4px;font-size:11.5px;color:var(--t2);cursor:pointer;background:none;border:none;transition:all .12s;white-space:nowrap;flex-shrink:0;max-width:160px}
+.tab:hover{background:var(--bg3);color:var(--t1)}
+.tab.active{background:var(--bg2);color:var(--t1)}
+.tab svg{width:11px;height:11px;flex-shrink:0;opacity:.5}
+.tname{overflow:hidden;text-overflow:ellipsis;max-width:90px}
+.tx{width:14px;height:14px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3);cursor:pointer;transition:all .1s;flex-shrink:0;line-height:1}
+.tx:hover{background:var(--bg4);color:var(--t1)}
+.tadd{width:22px;height:22px;border:none;background:none;border-radius:4px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;flex-shrink:0;transition:all .1s}
+.tadd:hover{background:var(--bg3);color:var(--t1)}
+.trename{background:var(--bg3);border:1px solid var(--blue);border-radius:3px;color:var(--t1);font-size:11.5px;padding:0 4px;height:20px;outline:none;width:90px}
+
+#mc{flex:1;overflow:hidden;background:var(--bg0)}
+
+.ctrl{display:flex;align-items:center;gap:5px;padding:6px 9px;background:var(--bg1);border-top:1px solid var(--b1);flex-shrink:0;flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:5px;background:var(--btn);border:1px solid var(--b2);color:var(--t2);font-size:11.5px;cursor:pointer;transition:all .12s;white-space:nowrap}
+.cb:hover:not(:disabled){background:var(--bth);color:var(--t1);border-color:var(--b3)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.cb.exec{border-color:#2d5a2d;color:#6dd96d}
+.cb.exec:hover:not(:disabled){background:#1a2e1a}
+.cb svg{width:12px;height:12px;flex-shrink:0}
+.csp{flex:1}
+.ib{width:28px;height:28px;border:none;background:none;border-radius:4px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.ib:hover{background:var(--bg3);color:var(--t1)}
+.ib svg{width:17px;height:17px}
+
+.rp{width:190px;background:var(--bg1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sw{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--b1)}
+.sw svg{width:12px;height:12px;color:var(--t3);flex-shrink:0}
+.si{flex:1;background:none;border:none;outline:none;color:var(--t2);font-size:12px}
+.si::placeholder{color:var(--t3)}
+.wsh{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--b1);flex-shrink:0;transition:background .1s}
+.wsh:hover{background:var(--bg2)}
+.wst{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500}
+.wst svg{width:13px;height:13px;color:var(--t2)}
+.wsc{color:var(--t3);transition:transform .15s}
+.wsc.cl{transform:rotate(180deg)}
+.wsc svg{width:11px;height:11px}
+.wsf{overflow-y:auto;flex:1}
+.wsf::-webkit-scrollbar{width:3px}
+.wsf::-webkit-scrollbar-thumb{background:var(--b2)}
+.fi{display:flex;align-items:center;gap:7px;padding:6px 14px;cursor:pointer;color:var(--t2);font-size:11.5px;transition:all .1s;user-select:none}
+.fi:hover{background:var(--bg2);color:var(--t1)}
+.fi svg{width:12px;height:12px;flex-shrink:0}
+.wsempty{padding:10px 14px;color:var(--t3);font-size:11px}
+
+.op{background:var(--bg1);border-top:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;transition:height .18s ease}
+.op.exp{height:130px}
+.op.col{height:32px}
+.oh{display:flex;align-items:center;justify-content:space-between;padding:0 10px;height:32px;cursor:pointer;flex-shrink:0;transition:background .1s}
+.oh:hover{background:var(--bg2)}
+.ot{font-size:11.5px;font-weight:500}
+.oc{display:flex;align-items:center;gap:8px}
+.oclear{font-size:10px;color:var(--t3);cursor:pointer;padding:2px 5px;border-radius:3px;transition:all .1s;background:none;border:none}
+.oclear:hover{background:var(--bg3);color:var(--t1)}
+.och svg{width:11px;height:11px;color:var(--t3);transition:transform .18s}
+.op.col .och svg{transform:rotate(180deg)}
+.ob{flex:1;overflow-y:auto;padding:2px 8px 4px}
+.ob::-webkit-scrollbar{width:3px}
+.ob::-webkit-scrollbar-thumb{background:var(--b2)}
+.ol{font-family:'JetBrains Mono','Courier New',monospace;font-size:11px;line-height:18px;word-break:break-all;display:flex;align-items:baseline;gap:5px}
+.ol-prefix{flex-shrink:0;font-size:10px;opacity:.6}
+.ol.p .ol-prefix{color:var(--t3)}
+.ol.p .ol-msg{color:var(--t1)}
+.ol.w .ol-prefix{color:var(--yellow)}
+.ol.w .ol-msg{color:var(--yellow)}
+.ol.e .ol-prefix{color:var(--red)}
+.ol.e .ol-msg{color:#e06060}
+.ol.i .ol-prefix{color:var(--blue)}
+.ol.i .ol-msg{color:var(--blue)}
+.ol.ok .ol-prefix,.ol.ok .ol-msg{color:var(--green)}
+.ol.sys .ol-prefix,.ol.sys .ol-msg{color:var(--t3)}
+
+.ibar{display:flex;align-items:center;justify-content:flex-end;padding:3px 8px;background:var(--bg1);border-top:1px solid var(--b1);flex-shrink:0}
+.instb{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--t2);font-size:11.5px;cursor:pointer;padding:3px 6px;border-radius:4px;transition:all .1s}
+.instb:hover{background:var(--bg2);color:var(--t1)}
+.instb svg{width:12px;height:12px}
+
+/* SETTINGS */
+.stw{flex:1;overflow-y:auto}
+.stw::-webkit-scrollbar{width:3px}
+.stw::-webkit-scrollbar-thumb{background:var(--b2)}
+.stt{display:flex;align-items:center;gap:8px;padding:12px 16px;font-weight:600;font-size:13px;border-bottom:1px solid var(--b1);position:sticky;top:0;background:var(--bg0);z-index:1}
+.stt svg{width:15px;height:15px;color:var(--t2)}
+.sti{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--b1)}
+.stin{flex:1;margin-right:12px}
+.stn{font-size:12.5px;font-weight:500;margin-bottom:2px}
+.std{font-size:11px;color:var(--t2)}
+.stb{padding:4px 13px;border-radius:5px;font-size:11.5px;background:var(--btn);border:1px solid var(--b2);color:var(--t2);cursor:pointer;flex-shrink:0;transition:all .1s}
+.stb:hover{background:var(--bth);color:var(--t1)}
+.stb.red{border-color:#5a2d2d;color:#e06060}
+.stb.red:hover{background:#2a1010}
+.stb.on{border-color:#2d5a2d;color:var(--green)}
+.stb.on:hover{background:#1a2e1a}
+
+/* ACCOUNT */
+.accw{flex:1;overflow-y:auto}
+.accw::-webkit-scrollbar{width:3px}
+.accw::-webkit-scrollbar-thumb{background:var(--b2)}
+.acc-hero{display:flex;flex-direction:column;align-items:center;padding:20px 16px 16px;border-bottom:1px solid var(--b1)}
+.acc-av{width:60px;height:60px;border-radius:50%;background:var(--bg3);border:2px solid var(--b2);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0}
+.acc-av img{width:100%;height:100%;object-fit:cover}
+.acc-av svg{width:28px;height:28px;color:var(--t3)}
+.acc-name{font-size:14px;font-weight:600;margin-bottom:3px}
+.acc-sub{font-size:11.5px;color:var(--t2)}
+.acc-sub.on{color:var(--green)}
+
+.acc-search{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--b1)}
+.acc-inp{flex:1;background:var(--bg2);border:1px solid var(--b2);border-radius:5px;color:var(--t1);font-size:12px;padding:5px 9px;outline:none;transition:border .1s}
+.acc-inp:focus{border-color:var(--blue)}
+.acc-inp::placeholder{color:var(--t3)}
+.acc-sbtn{padding:5px 12px;border-radius:5px;background:var(--btn);border:1px solid var(--b2);color:var(--t2);font-size:12px;cursor:pointer;transition:all .1s;white-space:nowrap;flex-shrink:0}
+.acc-sbtn:hover{background:var(--bth);color:var(--t1)}
+
+.acc-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--b1)}
+.acc-lbl{font-size:11.5px;color:var(--t2)}
+.acc-val{font-size:11.5px;color:var(--t1);text-align:right;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-val.mono{font-family:monospace;font-size:10.5px;color:var(--t3)}
+.acc-loading{padding:20px 16px;text-align:center;color:var(--t3);font-size:12px}
+.acc-err{padding:10px 16px;color:var(--red);font-size:11.5px}
+
+/* CTX */
+.ctx{position:fixed;background:var(--bg2);border:1px solid var(--b2);border-radius:6px;z-index:1000;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;overflow:hidden}
+.ctx.show{display:block}
+.cxi{padding:7px 12px;font-size:12px;color:var(--t2);cursor:pointer;transition:all .1s}
+.cxi:hover{background:var(--bg3);color:var(--t1)}
+.cxi.danger{color:var(--red)}
+.cxi.danger:hover{background:#2a1010}
+
+.toast{position:fixed;bottom:55px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--b2);border-radius:6px;padding:7px 14px;font-size:11.5px;color:var(--t1);z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+#ld{position:fixed;inset:0;background:var(--bg0);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:10px}
+#ld.gone{display:none}
+.sp{width:22px;height:22px;border:2px solid var(--b2);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lt{font-size:12px;color:var(--t3)}
+</style>
+</head>
+<body>
+<div id="ld"><div class="sp"></div><div class="lt">Loading Monaco...</div></div>
+<div class="app" id="app" style="display:none">
+
+  <div class="tbar">
+    <div class="tbl">
+      <span class="brand">AWP<b>.</b>GG</span>
+      <span class="sep">|</span>
+      <div class="tmenu" id="TM">
+        <button class="tmbtn" id="TMB" onclick="tmToggle()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          <span id="tmlbl">Scripting</span>
+          <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="drop" id="TMD">
+          <div class="ditem active" id="dscr" onclick="goView('s');tmToggle()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Scripting
+          </div>
+          <div class="ditem" id="dset" onclick="goView('g');tmToggle()">Settings</div>
+          <div class="ditem" id="dacc" onclick="goView('a');tmToggle()">Account</div>
+        </div>
+      </div>
+    </div>
+    <div class="tbr">
+      <div class="sdot" id="sd"></div>
+      <div class="wc">
+        <button class="wcb" onclick="doMin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button class="wcb" onclick="doMax()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/></svg></button>
+        <button class="wcb x" onclick="doClose()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sb">
+      <button class="sbb active" id="sbs" onclick="goView('s')" title="Scripting">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </button>
+      <button class="sbb" id="sbg" onclick="goView('g')" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </button>
+      <button class="sbb" id="sba" onclick="goView('a')" title="Account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+
+    <div class="content">
+
+      <!-- ── SCRIPTING ── -->
+      <div class="view" id="VS">
+        <div class="earea">
+          <div class="epane">
+            <div class="tbar2" id="TB"></div>
+            <div id="mc"></div>
+            <div class="ctrl">
+              <button class="cb exec" id="execBtn" onclick="execScript()" disabled>
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Execute</span>
+              </button>
+              <button class="cb" onclick="clearEd()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg><span>Clear</span>
+              </button>
+              <button class="cb" onclick="openFile()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Open</span>
+              </button>
+              <button class="cb" id="execFBtn" onclick="openExec()" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Execute</span>
+              </button>
+              <div class="csp"></div>
+              <button class="ib" onclick="doAttach()" title="Attach">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </button>
+              <button class="ib" onclick="doReattach()" title="Re-attach">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="rp">
+            <div class="sw">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="si" id="fsrch" type="text" placeholder="Search..." oninput="filterWs()">
+            </div>
+            <div class="wsh" onclick="toggleWs()">
+              <div class="wst">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Workspace
+              </div>
+              <span class="wsc" id="wsch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
+            </div>
+            <div id="wsf" class="wsf"></div>
+          </div>
+        </div>
+
+        <div class="op exp" id="OP">
+          <div class="oh" onclick="toggleOut()">
+            <span class="ot">Output</span>
+            <div class="oc">
+              <button class="oclear" onclick="clearOut(event)">Clear</button>
+              <span class="och"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
+            </div>
+          </div>
+          <div class="ob" id="OB"></div>
+        </div>
+
+        <div class="ibar">
+          <button class="instb" onclick="showInst()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span id="instlbl">None</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:9px;height:9px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="view hidden" id="VG">
+        <div class="stw">
+          <div class="stt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            General
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn">Reset State</div><div class="std">Clears all local AWP data and settings.</div></div>
+            <button class="stb" onclick="doResetState()">Reset</button>
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn">Spoof Hardware ID</div><div class="std">Hooks RbxAnalyticsService to return a fake HWID in-game.</div></div>
+            <button class="stb red" onclick="doSpoofHwid()">Spoof</button>
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn">Autoexec</div><div class="std">Run all scripts in /Delta/Autoexecute/ on executor attach.</div></div>
+            <button class="stb" id="aeBtn" onclick="toggleAutoexec()">Enable</button>
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn" id="tmN">Toggle topmost: Off</div><div class="std">Keep the AWP window always on top of other apps.</div></div>
+            <button class="stb" id="tmB" onclick="doTopmost()">Enable</button>
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn">Open Scripts folder</div><div class="std">Open /Delta/Scripts/ in the file manager.</div></div>
+            <button class="stb" onclick="openFolder('/storage/emulated/0/Delta/Scripts')">Open</button>
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn">Open Delta folder</div><div class="std">Open /storage/emulated/0/Delta/ in the file manager.</div></div>
+            <button class="stb" onclick="openFolder('/storage/emulated/0/Delta')">Open</button>
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn">Open Autoexecute folder</div><div class="std">Open /Delta/Autoexecute/ in the file manager.</div></div>
+            <button class="stb" onclick="openFolder('/storage/emulated/0/Delta/Autoexecute')">Open</button>
+          </div>
+          <div class="sti">
+            <div class="stin"><div class="stn">Reload Scripts</div><div class="std">Reload scripts from /Delta/Scripts/ into the workspace panel.</div></div>
+            <button class="stb" onclick="reloadWs()">Reload</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ACCOUNT ── -->
+      <div class="view hidden" id="VA">
+        <div class="accw">
+          <div class="acc-hero">
+            <div class="acc-av" id="accAv">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="acc-name" id="accName">—</div>
+            <div class="acc-sub" id="accSub">Search a Roblox user</div>
+          </div>
+
+          <div class="acc-search">
+            <input class="acc-inp" id="accInp" type="text" placeholder="Username or User ID" maxlength="50"
+              onkeydown="if(event.key==='Enter')fetchUser()">
+            <button class="acc-sbtn" onclick="fetchUser()">Search</button>
+          </div>
+
+          <div id="accInfo">
+            <div class="acc-loading" id="accLoad" style="display:none">
+              <div class="sp" style="width:16px;height:16px;margin:0 auto 6px"></div>Loading...
+            </div>
+            <div class="acc-err" id="accErr" style="display:none"></div>
+          </div>
+
+          <div class="acc-row"><span class="acc-lbl">Executor</span><span class="acc-val">Delta</span></div>
+          <div class="acc-row"><span class="acc-lbl">Connection</span><span class="acc-val" id="accConn">Disconnected</span></div>
+          <div class="acc-row"><span class="acc-lbl">Scripts</span><span class="acc-val mono">/sdcard/Delta/Scripts</span></div>
+          <div class="acc-row"><span class="acc-lbl">Autoexecute</span><span class="acc-val mono">/sdcard/Delta/Autoexecute</span></div>
+          <div class="acc-row"><span class="acc-lbl">Workspace</span><span class="acc-val mono">/sdcard/Delta/workspace/AWPM</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="ctx" id="CTX">
+  <div class="cxi" onclick="cxDo('rename')">Rename</div>
+  <div class="cxi" onclick="cxDo('dup')">Duplicate</div>
+  <div class="cxi" onclick="cxDo('save')">Save to Workspace</div>
+  <div class="cxi danger" onclick="cxDo('close')">Close Tab</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<script>
+'use strict';
+var ed, mAPI;
+var conn=false, wsOpen=true, outOpen=true, topmostOn=false, autoexecOn=false;
+var tabs=[], aid=null, tc=0, cxId=null, ttimer=null;
+
+var wfiles=[
+  {name:'dex++.lua',     content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()'},
+  {name:'GrabPart.lua',  content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/dthecoolest/GrabPart/main/GrabPart.lua"))()'},
+  {name:'InfiniteYield.lua', content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()'},
+  {name:'output-test.lua',   content:'print("Hello from AWP!")'},
+  {name:'Telekinesis.lua',   content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/0zark/scripts/main/Telekinesis.lua"))()'},
+];
+
+require.config({paths:{vs:'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs'}});
+require(['vs/editor/editor.main'], function(m){
+  mAPI=m;
+  m.editor.defineTheme('awp',{
+    base:'vs-dark',inherit:true,
+    rules:[
+      {token:'',foreground:'d4d4d4',background:'0d0d0d'},
+      {token:'comment',foreground:'5c7a5c',fontStyle:'italic'},
+      {token:'keyword',foreground:'569cd6'},{token:'keyword.lua',foreground:'569cd6'},
+      {token:'number',foreground:'b5cea8'},{token:'string',foreground:'ce9178'},
+      {token:'identifier',foreground:'9cdcfe'},{token:'type.identifier',foreground:'4ec9b0'},
+      {token:'delimiter.bracket',foreground:'ffd700'},
+    ],
+    colors:{
+      'editor.background':'#0d0d0d','editor.foreground':'#d4d4d4',
+      'editorLineNumber.foreground':'#3c3c3c','editorLineNumber.activeForeground':'#666',
+      'editor.selectionBackground':'#264f78','editor.lineHighlightBackground':'#141414',
+      'editorWidget.background':'#1a1a1a','editorSuggestWidget.background':'#1a1a1a',
+      'editorSuggestWidget.border':'#333','editorSuggestWidget.selectedBackground':'#2d2d2d',
+      'input.background':'#202020',
+    }
+  });
+
+  var rbx=['game','workspace','script','task','wait','print','warn','error','tostring','tonumber','type',
+    'pairs','ipairs','next','select','rawget','rawset','rawequal','rawlen','pcall','xpcall',
+    'getfenv','setfenv','getmetatable','setmetatable','require','loadstring',
+    'coroutine.wrap','coroutine.create','coroutine.resume','coroutine.yield','_G','shared',
+    'string.format','string.find','string.match','string.gsub','string.len','string.sub',
+    'string.rep','string.byte','string.char','string.upper','string.lower','string.split',
+    'table.insert','table.remove','table.sort','table.concat','table.move','table.unpack',
+    'math.floor','math.ceil','math.abs','math.sqrt','math.max','math.min','math.random',
+    'math.huge','math.pi','math.sin','math.cos','math.tan','math.atan2',
+    'Instance.new','Vector3.new','Vector2.new','CFrame.new','CFrame.Angles',
+    'Color3.new','Color3.fromRGB','Color3.fromHSV','UDim2.new','UDim.new',
+    'UDim2.fromScale','UDim2.fromOffset','BrickColor.new','BrickColor.Random',
+    'Enum','TweenInfo.new','NumberSequence.new','ColorSequence.new',
+    'NumberRange.new','Rect.new','Ray.new','Region3.new',
+    'game:GetService','game.Players','game.Players.LocalPlayer',
+    'game.Players.LocalPlayer.Character','game.Players.LocalPlayer.PlayerGui',
+    'game.Workspace','game.ReplicatedStorage','game.ServerStorage','game.Lighting',
+    'RunService','UserInputService','TweenService','HttpService','LogService',
+    'TweenService:Create','HttpService:JSONEncode','HttpService:JSONDecode',
+    'gethui','getgenv','getrenv','getsenv','getinstances','getnilinstances',
+    'getconnections','getscripts','getloadedmodules','getrawmetatable','setrawmetatable',
+    'firetouchinterest','fireproximityprompt','fireclickdetector',
+    'getcallbackvalue','checkcaller','isexecutorclosure','newcclosure',
+    'hookfunction','hookmetamethod','getnamecallmethod','setnamecallmethod',
+    'isreadonly','setreadonly',
+    'writefile','readfile','appendfile','listfiles','isfile','isfolder',
+    'makefolder','delfile','delfolder',
+    'HttpGet','HttpPost','WebSocket.connect',
+    'Drawing.new','getgc','getupvalues','setupvalue',
+    'debug.getinfo','debug.traceback','debug.getupvalue','debug.setupvalue',
+  ];
+
+  m.languages.registerCompletionItemProvider('lua',{
+    triggerCharacters:['.', ':'],
+    provideCompletionItems:function(model,pos){
+      var w=model.getWordUntilPosition(pos);
+      var r={startLineNumber:pos.lineNumber,endLineNumber:pos.lineNumber,startColumn:w.startColumn,endColumn:w.endColumn};
+      return {suggestions:rbx.map(function(k){return{label:k,kind:m.languages.CompletionItemKind.Function,insertText:k,range:r};})};
+    }
+  });
+
+  ed=m.editor.create(document.getElementById('mc'),{
+    value:'',language:'lua',theme:'awp',
+    fontSize:13,fontFamily:"'JetBrains Mono','Fira Code','Courier New',monospace",
+    lineNumbers:'on',lineNumbersMinChars:3,wordWrap:'off',
+    minimap:{enabled:false},
+    scrollbar:{vertical:'auto',horizontal:'auto',verticalScrollbarSize:5,horizontalScrollbarSize:5},
+    overviewRulerLanes:0,renderLineHighlight:'line',
+    smoothScrolling:true,cursorBlinking:'smooth',cursorSmoothCaretAnimation:'on',
+    automaticLayout:true,tabSize:4,insertSpaces:true,
+    suggest:{showKeywords:true},quickSuggestions:{other:true,comments:false,strings:false},
+    acceptSuggestionOnEnter:'smart',folding:true,padding:{top:8,bottom:8},
+  });
+
+  newTab('-- Welcome to AWP!');
+  renderWs();
+  loadDiskScripts();
+
+  document.getElementById('ld').classList.add('gone');
+  document.getElementById('app').style.display='flex';
+});
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function gid(){return 't'+(++tc);}
+function getT(id){return tabs.find(function(t){return t.id===id;});}
+function saveActive(){var t=getT(aid);if(t&&ed)t.content=ed.getValue();}
+
+function newTab(content){
+  var id=gid();tabs.push({id:id,name:'Untitled Tab',content:content||''});
+  if(aid)saveActive();
+  aid=id;renderTabs();
+  if(ed)ed.setValue(content||'');
+  ed&&ed.focus();
+}
+
+function switchTab(id){
+  if(id===aid)return;
+  saveActive();aid=id;
+  var t=getT(id);if(t&&ed)ed.setValue(t.content);
+  renderTabs();ed&&ed.focus();
+}
+
+function closeTab(id,e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  if(tabs.length===1){
+    var t=getT(id);
+    if(t){t.content='';t.name='Untitled Tab';}
+    if(ed)ed.setValue('');renderTabs();return;
+  }
+  var idx=tabs.findIndex(function(t){return t.id===id;});
+  tabs.splice(idx,1);
+  if(aid===id){
+    var nxt=tabs[Math.min(idx,tabs.length-1)];
+    aid=nxt.id;if(ed)ed.setValue(nxt.content);
+  }
+  renderTabs();
+}
+
+function renderTabs(){
+  var bar=document.getElementById('TB');
+  bar.innerHTML='';
+  tabs.forEach(function(t){
+    var el=document.createElement('div');
+    el.className='tab'+(t.id===aid?' active':'');
+    el.setAttribute('data-id',t.id);
+
+    var ico=svgEl('0 0 24 24','M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
+    var nm=document.createElement('span');nm.className='tname';nm.textContent=t.name;
+    var x=document.createElement('span');x.className='tx';x.textContent='×';
+
+    el.appendChild(ico);el.appendChild(nm);el.appendChild(x);
+    el.addEventListener('click',function(){switchTab(t.id);});
+    el.addEventListener('dblclick',function(e){e.stopPropagation();startRename(t.id,nm);});
+    el.addEventListener('contextmenu',function(e){showCtx(e,t.id);});
+    x.addEventListener('click',function(e){closeTab(t.id,e);});
+    bar.appendChild(el);
+  });
+  var add=document.createElement('button');
+  add.className='tadd';add.title='New tab';add.textContent='+';
+  add.onclick=function(){newTab();};
+  bar.appendChild(add);
+}
+
+function startRename(id,nmEl){
+  var t=getT(id);if(!t)return;
+  var inp=document.createElement('input');
+  inp.className='trename';inp.value=t.name;
+  nmEl.replaceWith(inp);inp.focus();inp.select();
+  function fin(){var v=inp.value.trim();if(v)t.name=v;renderTabs();}
+  inp.addEventListener('blur',fin);
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter')inp.blur();
+    if(e.key==='Escape'){inp.value=t.name;inp.blur();}
+    e.stopPropagation();
+  });
+}
+
+function svgEl(vb, d){
+  var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('viewBox',vb);s.setAttribute('fill','none');
+  s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2');
+  var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',d);s.appendChild(p);return s;
+}
+
+// ── CTX MENU ─────────────────────────────────────────────────────────────────
+var CTX=document.getElementById('CTX');
+function showCtx(e,id){e.preventDefault();e.stopPropagation();cxId=id;CTX.style.left=Math.min(e.clientX,window.innerWidth-145)+'px';CTX.style.top=Math.min(e.clientY,window.innerHeight-130)+'px';CTX.classList.add('show');}
+document.addEventListener('click',function(){CTX.classList.remove('show');});
+
+function cxDo(a){
+  CTX.classList.remove('show');var t=getT(cxId);if(!t)return;
+  if(a==='rename'){
+    var el=document.querySelector('[data-id="'+cxId+'"]');
+    if(el){var nm=el.querySelector('.tname');if(nm)startRename(cxId,nm);}
+  }else if(a==='dup'){
+    saveActive();var id=gid();tabs.push({id:id,name:t.name+' (copy)',content:t.content});
+    aid=id;if(ed)ed.setValue(t.content);renderTabs();
+  }else if(a==='save'){
+    saveActive();
+    var name=t.name.endsWith('.lua')?t.name:t.name+'.lua';
+    var ex=wfiles.findIndex(function(f){return f.name===name;});
+    if(ex>=0)wfiles[ex].content=t.content;else wfiles.push({name:name,content:t.content});
+    renderWs();
+    if(typeof AwpNative!=='undefined')AwpNative.saveWorkspaceFile(name,t.content);
+    toast('Saved to workspace: '+name);
+  }else if(a==='close'){closeTab(cxId,null);}
+}
+
+// ── EDITOR ACTIONS ───────────────────────────────────────────────────────────
+function execScript(){
+  if(!conn){log('err','No executor connected');return;}
+  var s=ed?ed.getValue():'';if(!s.trim())return;
+  if(typeof AwpNative!=='undefined')AwpNative.executeScript(s);
+  log('sys','Sent '+s.split('\n').length+' lines to executor');
+}
+
+function clearEd(){if(ed)ed.setValue('');saveActive();}
+
+function openFile(){
+  if(typeof AwpNative!=='undefined'){AwpNative.openFilePicker();return;}
+  var inp=document.createElement('input');inp.type='file';inp.accept='.lua,.luau,.txt';
+  inp.onchange=function(e){
+    var f=e.target.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(ev){saveActive();var id=gid();tabs.push({id:id,name:f.name,content:ev.target.result});aid=id;if(ed)ed.setValue(ev.target.result);renderTabs();};
+    r.readAsText(f);
+  };inp.click();
+}
+
+function openExec(){
+  if(!conn){log('err','No executor connected');return;}
+  if(typeof AwpNative!=='undefined')AwpNative.openFileAndExecute();
+}
+
+function doAttach(){log('sys',conn?'Already connected':'Open Delta → inject → AWP connects automatically');}
+function doReattach(){if(typeof AwpNative!=='undefined')AwpNative.reattach();log('sys','Trying to re-attach...');}
+
+// ── WORKSPACE / SCRIPTS ───────────────────────────────────────────────────────
+function renderWs(){
+  var c=document.getElementById('wsf');
+  if(!wsOpen){c.style.display='none';return;}
+  c.style.display='';
+  var q=document.getElementById('fsrch').value.toLowerCase();
+  var fil=wfiles.filter(function(f){return f.name.toLowerCase().includes(q);});
+  if(!fil.length){c.innerHTML='<div class="wsempty">No scripts</div>';return;}
+  c.innerHTML='';
+  fil.forEach(function(f){
+    var el=document.createElement('div');el.className='fi';
+    var ico=svgEl('0 0 24 24','M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
+    var nm=document.createElement('span');nm.textContent=f.name;
+    el.appendChild(ico);el.appendChild(nm);
+    (function(fn,fc){el.addEventListener('click',function(){loadWsFile(fn,fc);});})(f.name,f.content);
+    c.appendChild(el);
+  });
+}
+
+function loadWsFile(name,content){
+  saveActive();var id=gid();tabs.push({id:id,name:name,content:content});
+  aid=id;if(ed)ed.setValue(content);renderTabs();ed&&ed.focus();
+}
+
+function filterWs(){renderWs();}
+
+function toggleWs(){
+  wsOpen=!wsOpen;
+  document.getElementById('wsch').className='wsc'+(wsOpen?'':' cl');
+  renderWs();
+}
+
+function loadDiskScripts(){
+  if(typeof AwpNative==='undefined')return;
+  try{
+    var files=AwpNative.getWorkspaceFiles();
+    if(files){
+      var parsed=JSON.parse(files);
+      parsed.forEach(function(f){
+        var ex=wfiles.findIndex(function(x){return x.name===f.name;});
+        if(ex>=0)wfiles[ex]=f;else wfiles.push(f);
+      });
+      renderWs();
+    }
+  }catch(e){}
+}
+
+function reloadWs(){loadDiskScripts();toast('Scripts reloaded from /Delta/Scripts/');}
+
+// ── OUTPUT ────────────────────────────────────────────────────────────────────
+var typeMap={
+  'print': {cls:'p', lbl:''},
+  'warn':  {cls:'w', lbl:'⚠ '},
+  'error': {cls:'e', lbl:'✕ '},
+  'info':  {cls:'i', lbl:'ℹ '},
+  'ok':    {cls:'ok',lbl:'✓ '},
+  'sys':   {cls:'sys',lbl:''},
+  'err':   {cls:'e', lbl:'✕ '},
+};
+
+function log(type, msg){
+  var b=document.getElementById('OB');
+  var meta=typeMap[type]||typeMap['print'];
+  var el=document.createElement('div');el.className='ol '+meta.cls;
+  var pf=document.createElement('span');pf.className='ol-prefix';pf.textContent=meta.lbl;
+  var ms=document.createElement('span');ms.className='ol-msg';ms.textContent=msg;
+  el.appendChild(pf);el.appendChild(ms);
+  b.appendChild(el);b.scrollTop=b.scrollHeight;
+  if(!outOpen){outOpen=true;document.getElementById('OP').className='op exp';}
+}
+
+function clearOut(e){e&&e.stopPropagation();document.getElementById('OB').innerHTML='';}
+
+function toggleOut(){
+  outOpen=!outOpen;
+  document.getElementById('OP').className='op '+(outOpen?'exp':'col');
+}
+
+// ── ACCOUNT ───────────────────────────────────────────────────────────────────
+function fetchUser(){
+  var q=document.getElementById('accInp').value.trim();
+  if(!q)return;
+  document.getElementById('accLoad').style.display='block';
+  document.getElementById('accErr').style.display='none';
+  document.getElementById('accInfo').querySelectorAll('.acc-fetched').forEach(function(el){el.remove();});
+
+  fetch('https://oficial.msdoors.xyz/api/v1/user-info?user='+encodeURIComponent(q))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      document.getElementById('accLoad').style.display='none';
+      if(!d.success){throw new Error(d.error||'User not found');}
+      document.getElementById('accName').textContent=d.displayName+' (@'+d.username+')';
+      document.getElementById('accSub').textContent='ID: '+d.userId;
+      document.getElementById('accSub').className='acc-sub';
+      var av=document.getElementById('accAv');
+      av.innerHTML='';
+      var img=document.createElement('img');
+      img.src=d.avatarUrl;
+      img.onerror=function(){av.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';};
+      av.appendChild(img);
+
+      var rows=[
+        {lbl:'Username',val:'@'+d.username},
+        {lbl:'Display Name',val:d.displayName},
+        {lbl:'User ID',val:d.userId},
+      ];
+      var info=document.getElementById('accInfo');
+      rows.forEach(function(row){
+        var r=document.createElement('div');r.className='acc-row acc-fetched';
+        r.innerHTML='<span class="acc-lbl">'+row.lbl+'</span><span class="acc-val">'+row.val+'</span>';
+        info.appendChild(r);
+      });
+    })
+    .catch(function(err){
+      document.getElementById('accLoad').style.display='none';
+      var e=document.getElementById('accErr');
+      e.textContent=err.message||'Failed to fetch user';e.style.display='block';
+    });
+}
+
+// ── VIEW ─────────────────────────────────────────────────────────────────────
+function goView(v){
+  ['s','g','a'].forEach(function(x){
+    document.getElementById('V'+x.toUpperCase()).className='view'+(v===x?'':' hidden');
+    document.getElementById('sb'+x).className='sbb'+(v===x?' active':'');
+    if(document.getElementById('d'+({s:'scr',g:'set',a:'acc'}[x])))
+      document.getElementById('d'+({s:'scr',g:'set',a:'acc'}[x])).className='ditem'+(v===x?' active':'');
+  });
+  var lbls={s:'Scripting',g:'Settings',a:'Account'};
+  document.getElementById('tmlbl').textContent=lbls[v]||'Scripting';
+  if(ed&&v==='s')setTimeout(function(){ed.layout();},50);
+}
+
+function tmToggle(){
+  var btn=document.getElementById('TMB'),dd=document.getElementById('TMD');
+  var o=dd.classList.toggle('show');btn.classList.toggle('open',o);
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#TM')){document.getElementById('TMD').classList.remove('show');document.getElementById('TMB').classList.remove('open');}
+});
+
+function showInst(){log(conn?'sys':'err',conn?'Instance: Roblox (connected)':'No executor attached — open Delta and inject first');}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+function doResetState(){
+  wfiles=[
+    {name:'dex++.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()'},
+    {name:'GrabPart.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/dthecoolest/GrabPart/main/GrabPart.lua"))()'},
+    {name:'InfiniteYield.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()'},
+    {name:'output-test.lua',content:'print("Hello from AWP!")'},
+    {name:'Telekinesis.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/0zark/scripts/main/Telekinesis.lua"))()'},
+  ];
+  renderWs();
+  if(typeof AwpNative!=='undefined')AwpNative.clearAppState();
+  toast('State reset');log('sys','State has been reset');
+}
+
+function doSpoofHwid(){
+  if(!conn){toast('Connect executor first');return;}
+  var fakeId=Math.random().toString(36).substr(2,8).toUpperCase()+'-'+
+             Math.random().toString(36).substr(2,8).toUpperCase()+'-'+
+             Date.now().toString(16).toUpperCase();
+  var script=
+    'local old\n'+
+    'old = hookmetamethod(game, "__namecall", function(self, ...)\n'+
+    '    if self == game:GetService("RbxAnalyticsService") and getnamecallmethod() == "GetClientId" then\n'+
+    '        return "'+fakeId+'"\n'+
+    '    end\n'+
+    '    return old(self, ...)\n'+
+    'end)\n'+
+    'print("[AWP] HWID spoofed -> '+fakeId+'")\n';
+  if(typeof AwpNative!=='undefined')AwpNative.executeScript(script);
+  log('ok','HWID spoof sent → '+fakeId);
+  toast('HWID spoofed');
+}
+
+function toggleAutoexec(){
+  autoexecOn=!autoexecOn;
+  document.getElementById('aeBtn').textContent=autoexecOn?'Disable':'Enable';
+  document.getElementById('aeBtn').className='stb'+(autoexecOn?' on':'');
+  if(typeof AwpNative!=='undefined')AwpNative.setAutoexec(autoexecOn);
+  toast('Autoexec '+(autoexecOn?'enabled':'disabled'));
+  log('sys','Autoexec '+(autoexecOn?'ON — scripts in /Delta/Autoexecute/ will run on attach':'OFF'));
+}
+
+function doTopmost(){
+  topmostOn=!topmostOn;
+  document.getElementById('tmN').textContent='Toggle topmost: '+(topmostOn?'On':'Off');
+  document.getElementById('tmB').textContent=topmostOn?'Disable':'Enable';
+  document.getElementById('tmB').className='stb'+(topmostOn?' on':'');
+  if(typeof AwpNative!=='undefined')AwpNative.setTopmost(topmostOn);
+  toast('Topmost '+(topmostOn?'enabled':'disabled'));
+}
+
+function openFolder(path){
+  if(typeof AwpNative!=='undefined')AwpNative.openFolder(path);
+  else toast(path);
+}
+
+// ── WINDOW ────────────────────────────────────────────────────────────────────
+function doMin(){if(typeof AwpNative!=='undefined')AwpNative.minimize();}
+function doMax(){if(typeof AwpNative!=='undefined')AwpNative.maximize();}
+function doClose(){if(typeof AwpNative!=='undefined')AwpNative.closeApp();}
+
+// ── ANDROID EVENTS ───────────────────────────────────────────────────────────
+window.addEventListener('awp:status',function(e){
+  conn=e.detail==='connected';
+  document.getElementById('sd').className='sdot'+(conn?' on':'');
+  document.getElementById('execBtn').disabled=!conn;
+  document.getElementById('execFBtn').disabled=!conn;
+  document.getElementById('instlbl').textContent=conn?'Roblox':'None';
+  document.getElementById('accConn').textContent=conn?'Connected to Roblox':'Disconnected';
+  log(conn?'ok':'err',conn?'Executor connected':'Executor disconnected');
+  if(conn&&autoexecOn)runAutoexec();
+  if(conn)loadDiskScripts();
+});
+
+window.addEventListener('awp:output',function(e){
+  var d=e.detail;
+  if(!d)return;
+  var type, msg;
+  if(typeof d==='object'){
+    type=d.type||'print';msg=d.msg||'';
+  }else{
+    type='print';msg=String(d);
+  }
+  var mapped={print:'print',warn:'warn',error:'err',info:'i',ok:'ok',sys:'sys',err:'err'}[type]||'print';
+  log(mapped,msg);
+});
+
+window.addEventListener('awp:file',function(e){
+  var d=e.detail;if(!d)return;
+  saveActive();var id=gid();
+  tabs.push({id:id,name:d.name||'script.lua',content:d.content||''});
+  aid=id;if(ed)ed.setValue(d.content||'');renderTabs();
+});
+
+function runAutoexec(){
+  if(typeof AwpNative==='undefined')return;
+  try{
+    var files=AwpNative.getAutoexecFiles();
+    if(files){
+      var parsed=JSON.parse(files);
+      parsed.forEach(function(f){
+        AwpNative.executeScript(f.content);
+        log('sys','[Autoexec] '+f.name);
+      });
+      if(parsed.length)log('ok','Autoexec: ran '+parsed.length+' script(s)');
+    }
+  }catch(e){log('err','Autoexec failed: '+e.message);}
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function toast(m){
+  var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(ttimer);ttimer=setTimeout(function(){t.classList.remove('show');},2200);
+}
+document.addEventListener('contextmenu',function(e){if(!e.target.closest('.tab'))e.preventDefault();});
+</script>
+</body>
+</html>
