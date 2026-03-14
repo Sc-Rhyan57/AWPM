@@ -20,9 +20,8 @@ class OverlayModel(private val app: Application) {
     private var httpServer: SessionHttpServer? = null
     private val scope = CoroutineScope(Dispatchers.IO)
     private val mainHandler = Handler(Looper.getMainLooper())
-
     private var disconnectRunnable: Runnable? = null
-    private val disconnectDebounceMs = 1500L
+    private val DISCONNECT_DEBOUNCE_MS = 5_000L
 
     fun start() {
         scope.launch {
@@ -45,7 +44,7 @@ class OverlayModel(private val app: Application) {
                             }
                         }
                         disconnectRunnable = r
-                        mainHandler.postDelayed(r, disconnectDebounceMs)
+                        mainHandler.postDelayed(r, DISCONNECT_DEBOUNCE_MS)
                     }
                 ).also { it.start() }
             } catch (e: Exception) {
@@ -57,9 +56,8 @@ class OverlayModel(private val app: Application) {
     fun executeScript(script: String) {
         if (script.isBlank()) return
         scope.launch {
-            val server = wsServer
-            if (server != null && server.isClientConnected()) {
-                server.executeScript(script)
+            if (wsServer?.isClientConnected() == true) {
+                wsServer?.executeScript(script)
             } else {
                 appendOutput("sys:Nenhum executor conectado")
             }
