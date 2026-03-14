@@ -15,44 +15,46 @@ class AwpWebSocketServer(
     private val onScriptOutput: (String) -> Unit,
     private val onClientConnected: () -> Unit,
     private val onClientDisconnected: () -> Unit
-) : WebSocketServer(InetSocketAddress(9999)) {
+) : WebSocketServer(InetSocketAddress("0.0.0.0", 9999)) {
 
-    private var activeClient: WebSocket? = null
     private val tag = "AwpWsServer"
-    private var pingTimer: Timer? = null
+
+    @Volatile private var activeClient: WebSocket? = null
+    @Volatile private var heartbeatTimer: Timer? = null
+
+    init {
+        isReuseAddr = true
+        isTcpNoDelay = true
+        connectionLostTimeout = 0
+    }
 
     override fun onOpen(conn: WebSocket, handshake: ClientHandshake) {
+        val old = activeClient
+        if (old != null && old.isOpen && old != conn) {
+            try { old.closeConnection(1000, "replaced") } catch (_: Exception) {}
+        }
         activeClient = conn
+        startHeartbeat()
         onClientConnected()
-        startPingTimer()
-        Log.d(tag, "Client connected: ${conn.remoteSocketAddress}")
+        Log.d(tag, "onOpen: ${conn.remoteSocketAddress}")
     }
 
     override fun onClose(conn: WebSocket, code: Int, reason: String, remote: Boolean) {
-        if (activeClient == conn) {
+        Log.d(tag, "onClose code=$code reason='$reason' remote=$remote")
+        if (activeClient === conn) {
             activeClient = null
-            stopPingTimer()
+            stopHeartbeat()
             onClientDisconnected()
         }
-        Log.d(tag, "Client disconnected: code=$code reason=$reason remote=$remote")
     }
 
     override fun onMessage(conn: WebSocket, message: String) {
         when {
             message == "pong" -> {}
-            message == "__ready" -> {
-                Log.d(tag, "Executor ready")
-                onScriptOutput("sys:Executor conectado")
-            }
-            message.startsWith("__console:") -> {
-                onScriptOutput(message.removePrefix("__console:"))
-            }
-            message.startsWith("__error:") -> {
-                onScriptOutput("error:${message.removePrefix("__error:")}")
-            }
-            message.startsWith("__meta:") -> {
-                onScriptOutput(message)
-            }
+            message == "__ready" -> onScriptOutput("sys:Executor conectado")
+            message.startsWith("__console:") -> onScriptOutput(message.removePrefix("__console:"))
+            message.startsWith("__error:") -> onScriptOutput("error:${message.removePrefix("__error:")}")
+            message.startsWith("__meta:") -> onScriptOutput(message)
             else -> onScriptOutput(message)
         }
     }
@@ -60,46 +62,45 @@ class AwpWebSocketServer(
     override fun onMessage(conn: WebSocket, message: ByteBuffer) {}
 
     override fun onError(conn: WebSocket?, ex: Exception) {
-        Log.e(tag, "WebSocket error: ${ex.message}")
+        Log.e(tag, "onError: ${ex.message}")
     }
 
     override fun onStart() {
-        connectionLostTimeout = 0
-        Log.d(tag, "WebSocket server started on port 9999")
+        Log.d(tag, "WebSocket server started on :9999")
     }
 
     fun executeScript(script: String) {
-        val client = activeClient
-        if (client != null && client.isOpen) {
-            client.send(script)
+        val client = activeClient ?: return
+        if (client.isOpen) {
+            try { client.send(script) } catch (e: Exception) { Log.e(tag, "send failed: ${e.message}") }
         }
     }
 
     fun isClientConnected(): Boolean = activeClient?.isOpen == true
 
-    private fun startPingTimer() {
-        stopPingTimer()
-        pingTimer = Timer().apply {
+    private fun startHeartbeat() {
+        stopHeartbeat()
+        heartbeatTimer = Timer("awp-heartbeat", true).apply {
             scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
-                    val client = activeClient
-                    if (client != null && client.isOpen) {
-                        try { client.send("ping") } catch (_: Exception) {}
+                    val c = activeClient
+                    if (c != null && c.isOpen) {
+                        try { c.send("ping") } catch (_: Exception) { stopHeartbeat() }
                     } else {
-                        stopPingTimer()
+                        stopHeartbeat()
                     }
                 }
-            }, 10_000L, 10_000L)
+            }, 5_000L, 5_000L)
         }
     }
 
-    private fun stopPingTimer() {
-        pingTimer?.cancel()
-        pingTimer = null
+    private fun stopHeartbeat() {
+        heartbeatTimer?.cancel()
+        heartbeatTimer = null
     }
 
-    override fun stop() {
-        stopPingTimer()
-        super.stop()
+    override fun stop(timeout: Int) {
+        stopHeartbeat()
+        super.stop(timeout)
     }
 }
