@@ -1,7 +1,6 @@
 package gg.awp.executor.overlay
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -14,7 +13,6 @@ import android.os.Build
 import android.os.IBinder
 import android.provider.OpenableColumns
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -24,9 +22,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
-import androidx.activity.result.contract.ActivityResultContracts
-import gg.awp.executor.R
-import gg.awp.executor.model.ExecutorViewModel
 import gg.awp.executor.model.OverlayModel
 import org.json.JSONArray
 import org.json.JSONObject
@@ -186,7 +181,7 @@ class OverlayService : Service() {
         contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
     } catch (e: Exception) { null }
 
-    private fun getFileName(uri: Uri): String {
+    private fun getFileName(uri: android.net.Uri): String {
         var name = "script.lua"
         contentResolver.query(uri, null, null, null, null)?.use { c ->
             val col = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
