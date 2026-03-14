@@ -10,7 +10,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -29,7 +31,9 @@ import android.widget.FrameLayout
 import gg.awp.executor.model.OverlayModel
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.net.NetworkInterface
 
 class OverlayService : Service() {
@@ -42,6 +46,7 @@ class OverlayService : Service() {
         const val OVERLAY_H_DP = 480
         const val HTTP_PORT = 8080
         const val AUTOEXEC_FILE = ".AWP_SESSION.lua"
+        const val CORNER_RADIUS_DP = 14
 
         val KNOWN_EXECUTOR_PATHS = listOf(
             "Delta"    to listOf("Delta/Scripts",    "Delta/Autoexecute"),
@@ -55,7 +60,7 @@ class OverlayService : Service() {
     }
 
     private lateinit var wm: WindowManager
-    private lateinit var overlayView: View
+    private lateinit var overlayView: FrameLayout
     private lateinit var wv: WebView
     private lateinit var model: OverlayModel
 
@@ -63,7 +68,6 @@ class OverlayService : Service() {
     private var initialX = 0; private var initialY = 0
     private var initialTouchX = 0f; private var initialTouchY = 0f
     private var isLocked = false
-
     private var initialW = 0; private var initialH = 0
     private var resizeTouchX = 0f; private var resizeTouchY = 0f
     private var isResizing = false
@@ -96,7 +100,8 @@ class OverlayService : Service() {
         return "127.0.0.1"
     }
 
-    private fun buildLoadstring() = "loadstring(game:HttpGet(\"http://${getLocalIp()}:$HTTP_PORT/session/script\"))()"
+    private fun buildLoadstring() =
+        "loadstring(game:HttpGet(\"http://${getLocalIp()}:$HTTP_PORT/session/script\"))()"
 
     private fun detectExecutor() {
         val base = Environment.getExternalStorageDirectory()
@@ -117,7 +122,7 @@ class OverlayService : Service() {
 
     private fun writeAutoexecSession() {
         try {
-            val dir = File(if (detectedAutoexecPath.isNotEmpty()) detectedAutoexecPath else "/sdcard/Delta/Autoexecute")
+            val dir = File(detectedAutoexecPath.ifEmpty { "/sdcard/Delta/Autoexecute" })
             if (!dir.exists()) dir.mkdirs()
             File(dir, AUTOEXEC_FILE).writeText(buildLoadstring())
         } catch (_: Exception) {}
@@ -131,7 +136,35 @@ class OverlayService : Service() {
     }
 
     private fun getAwpWorkspaceDir(): File =
-        File(Environment.getExternalStorageDirectory(), "Delta/workspace/AWPM").also { if (!it.exists()) it.mkdirs() }
+        File(Environment.getExternalStorageDirectory(), "Delta/workspace/AWPM")
+            .also { if (!it.exists()) it.mkdirs() }
+
+    private fun readLogcat(): String {
+        return try {
+            val pid = android.os.Process.myPid().toString()
+            val proc = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-v", "time", "--pid=$pid", "-t", "300"))
+            val sb = StringBuilder()
+            BufferedReader(InputStreamReader(proc.inputStream)).use { br ->
+                var line: String?
+                while (br.readLine().also { line = it } != null) sb.append(line).append('\n')
+            }
+            sb.toString()
+        } catch (e: Exception) { "Erro ao ler logcat: ${e.message}" }
+    }
+
+    private fun buildRoundedBackground(): GradientDrawable {
+        val cornerPx = dpToPx(CORNER_RADIUS_DP).toFloat()
+        return GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(Color.parseColor("#0d0d0d"))
+            cornerRadii = floatArrayOf(
+                cornerPx, cornerPx,
+                cornerPx, cornerPx,
+                cornerPx, cornerPx,
+                cornerPx, cornerPx
+            )
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate() {
@@ -162,14 +195,24 @@ class OverlayService : Service() {
             y = (screenH - overlayH) / 6
         }
 
-        overlayView = FrameLayout(this)
+        overlayView = FrameLayout(this).apply {
+            background = buildRoundedBackground()
+            clipToOutline = true
+            outlineProvider = android.view.ViewOutlineProvider.BACKGROUND
+        }
+
         wv = WebView(this).apply {
             layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
             )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            }
         }
+
         setupWebView()
-        (overlayView as FrameLayout).addView(wv)
+        overlayView.addView(wv)
         setupDrag()
         wm.addView(overlayView, params)
         startForeground(NOTIF_ID, buildNotification())
@@ -201,8 +244,8 @@ class OverlayService : Service() {
         wv.setOnTouchListener { _, event ->
             if (isLocked) return@setOnTouchListener false
             val p = params ?: return@setOnTouchListener false
-            val edgePx = dpToPx(24)
-            val inResize = event.x > p.width - edgePx && event.y > p.height - edgePx
+            val edge = dpToPx(24)
+            val inResize = event.x > p.width - edge && event.y > p.height - edge
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     initialX = p.x; initialY = p.y
@@ -214,8 +257,8 @@ class OverlayService : Service() {
                 MotionEvent.ACTION_MOVE -> {
                     if (isResizing) {
                         val (sw, sh) = getScreenSize()
-                        p.width = ((initialW + (event.rawX - resizeTouchX)).toInt()).coerceIn(dpToPx(280), sw)
-                        p.height = ((initialH + (event.rawY - resizeTouchY)).toInt()).coerceIn(dpToPx(220), sh)
+                        p.width = (initialW + (event.rawX - resizeTouchX).toInt()).coerceIn(dpToPx(280), sw)
+                        p.height = (initialH + (event.rawY - resizeTouchY).toInt()).coerceIn(dpToPx(220), sh)
                         try { wm.updateViewLayout(overlayView, p) } catch (_: Exception) {}
                         true
                     } else {
@@ -256,14 +299,16 @@ class OverlayService : Service() {
         }
     }
 
-    private fun escJs(s: String) = s.replace("\\","\\\\").replace("'","\\'").replace("\n","\\n").replace("\r","")
+    private fun escJs(s: String) = s
+        .replace("\\", "\\\\").replace("'", "\\'")
+        .replace("\n", "\\n").replace("\r", "")
 
     private fun readFolder(path: String): String {
         val dir = File(path)
         if (!dir.exists() || !dir.isDirectory) return "[]"
         val arr = JSONArray()
         dir.listFiles()
-            ?.filter { it.isFile && it.extension in listOf("lua","luau","txt") }
+            ?.filter { it.isFile && it.extension in listOf("lua", "luau", "txt") }
             ?.sortedBy { it.name }
             ?.forEach { f -> arr.put(JSONObject().apply { put("name", f.name); put("content", f.readText()) }) }
         return arr.toString()
@@ -310,9 +355,10 @@ class OverlayService : Service() {
             try { File(getAwpWorkspaceDir(), name).writeText(content) } catch (_: Exception) {}
         }
 
-        @JavascriptInterface fun readWorkspaceFile(name: String): String? {
-            return try { File(getAwpWorkspaceDir(), name).takeIf { it.exists() }?.readText() } catch (_: Exception) { null }
-        }
+        @JavascriptInterface fun readWorkspaceFile(name: String): String? =
+            try { File(getAwpWorkspaceDir(), name).takeIf { it.exists() }?.readText() } catch (_: Exception) { null }
+
+        @JavascriptInterface fun getLogs(): String = readLogcat()
 
         @JavascriptInterface fun openFilePicker() {}
         @JavascriptInterface fun openFileAndExecute() {}
@@ -330,9 +376,10 @@ class OverlayService : Service() {
     private fun buildNotification(): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
-                .createNotificationChannel(NotificationChannel(NOTIF_CHANNEL, "AWP Overlay", NotificationManager.IMPORTANCE_LOW)
-                    .apply { description = "AWP floating window" })
-
+                .createNotificationChannel(
+                    NotificationChannel(NOTIF_CHANNEL, "AWP Overlay", NotificationManager.IMPORTANCE_LOW)
+                        .apply { description = "AWP floating window" }
+                )
         val showIntent = PendingIntent.getService(
             this, 0,
             Intent(this, OverlayService::class.java).setAction("SHOW_OVERLAY"),
@@ -340,11 +387,12 @@ class OverlayService : Service() {
         )
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             Notification.Builder(this, NOTIF_CHANNEL)
-                .setContentTitle("AWP.GG").setContentText("Toque para mostrar a janela")
-                .setSmallIcon(android.R.drawable.ic_menu_view).setContentIntent(showIntent).setOngoing(true).build()
+                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
+                .setSmallIcon(android.R.drawable.ic_menu_view)
+                .setContentIntent(showIntent).setOngoing(true).build()
         else @Suppress("DEPRECATION")
             Notification.Builder(this)
-                .setContentTitle("AWP.GG").setContentText("Toque para mostrar a janela")
+                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
                 .setSmallIcon(android.R.drawable.ic_menu_view).setOngoing(true).build()
     }
 
