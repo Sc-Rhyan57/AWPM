@@ -1,57 +1,82 @@
 package gg.awp.executor.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import gg.awp.executor.overlay.OverlayService
 
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        const val REQUEST_OVERLAY = 1001
+    private val overlayPermLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (hasOverlayPermission()) {
+            checkStoragePermissionThenStart()
+        } else {
+            Toast.makeText(this, "Permissão de overlay negada — AWP não pode flutuar sem ela", Toast.LENGTH_LONG).show()
+            finish()
+        }
+    }
+
+    private val storagePermLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        startOverlay()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         if (hasOverlayPermission()) {
+            checkStoragePermissionThenStart()
+        } else {
+            Toast.makeText(this, "AWP precisa da permissão de overlay para flutuar sobre apps", Toast.LENGTH_LONG).show()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                overlayPermLauncher.launch(
+                    Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                )
+            }
+        }
+    }
+
+    private fun hasOverlayPermission(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            Settings.canDrawOverlays(this)
+        else true
+
+    private fun hasStoragePermission(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            Environment.isExternalStorageManager()
+        else true
+
+    private fun checkStoragePermissionThenStart() {
+        if (hasStoragePermission()) {
             startOverlay()
         } else {
-            requestOverlayPermission()
-        }
-    }
-
-    private fun hasOverlayPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Settings.canDrawOverlays(this)
-        } else true
-    }
-
-    private fun requestOverlayPermission() {
-        Toast.makeText(this, "AWP needs overlay permission to float over apps", Toast.LENGTH_LONG).show()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
-            )
-            startActivityForResult(intent, REQUEST_OVERLAY)
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_OVERLAY) {
-            if (hasOverlayPermission()) {
-                startOverlay()
+            Toast.makeText(this, "AWP precisa de acesso total ao armazenamento para ler scripts do Seu Executor", Toast.LENGTH_LONG).show()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                try {
+                    storagePermLauncher.launch(
+                        Intent(
+                            Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                            Uri.parse("package:$packageName")
+                        )
+                    )
+                } catch (_: Exception) {
+                    storagePermLauncher.launch(
+                        Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                    )
+                }
             } else {
-                Toast.makeText(this, "Overlay permission denied — AWP cannot float without it", Toast.LENGTH_LONG).show()
-                finish()
+                startOverlay()
             }
         }
     }
