@@ -29,10 +29,6 @@ class AwpWebSocketServer(
     }
 
     override fun onOpen(conn: WebSocket, handshake: ClientHandshake) {
-        val old = activeClient
-        if (old != null && old.isOpen && old != conn) {
-            try { old.closeConnection(1000, "replaced") } catch (_: Exception) {}
-        }
         activeClient = conn
         startHeartbeat()
         onClientConnected()
@@ -72,7 +68,9 @@ class AwpWebSocketServer(
     fun executeScript(script: String) {
         val client = activeClient ?: return
         if (client.isOpen) {
-            try { client.send(script) } catch (e: Exception) { Log.e(tag, "send failed: ${e.message}") }
+            try { client.send(script) } catch (e: Exception) {
+                Log.e(tag, "send failed: ${e.message}")
+            }
         }
     }
 
@@ -80,7 +78,7 @@ class AwpWebSocketServer(
 
     private fun startHeartbeat() {
         stopHeartbeat()
-        heartbeatTimer = Timer("awp-heartbeat", true).apply {
+        heartbeatTimer = Timer("awp-hb", true).apply {
             scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     val c = activeClient
@@ -90,7 +88,7 @@ class AwpWebSocketServer(
                         stopHeartbeat()
                     }
                 }
-            }, 5_000L, 5_000L)
+            }, 8_000L, 8_000L)
         }
     }
 
