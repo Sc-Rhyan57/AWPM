@@ -3,6 +3,7 @@ package gg.awp.executor.server
 import android.content.Context
 import android.util.Log
 import org.java_websocket.WebSocket
+import org.java_websocket.drafts.Draft
 import org.java_websocket.drafts.Draft_6455
 import org.java_websocket.extensions.IExtension
 import org.java_websocket.handshake.ClientHandshake
@@ -22,10 +23,10 @@ class AwpWebSocketServer(
     private val onClientDisconnected: () -> Unit
 ) : WebSocketServer(
     InetSocketAddress("0.0.0.0", 9999),
-    Collections.singletonList(
+    listOf<Draft>(
         Draft_6455(
             emptyList<IExtension>(),
-            Collections.singletonList<IProtocol>(Protocol(""))
+            listOf<IProtocol>(Protocol(""))
         )
     )
 ) {
