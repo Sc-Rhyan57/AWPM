@@ -20,10 +20,10 @@ pcall(function()
 end)
 
 local metaPayload = HttpService:JSONEncode({
-    executor = execName,
-    userId = userId,
+    executor    = execName,
+    userId      = userId,
     displayName = displayName,
-    username = username
+    username    = username
 })
 
 pcall(function()
@@ -93,38 +93,49 @@ end)
 local function connect()
     if connecting or connected then return end
     connecting = true
-    local ok = pcall(function()
+    ws = nil
+
+    local ok, err = pcall(function()
         ws = WebSocket.connect("ws://127.0.0.1:9999")
-        connected = true
-        connecting = false
-
-        ws.OnMessage:Connect(function(msg)
-            if msg == "ping" then
-                send("pong")
-                return
-            end
-            local fn, err = loadstring(msg)
-            if fn then
-                local ok2, execErr = pcall(fn)
-                if not ok2 then send("__error:" .. tostring(execErr)) end
-            else
-                send("__error:syntax:" .. tostring(err))
-            end
-        end)
-
-        ws.OnClose:Connect(function()
-            connected = false
-            ws = nil
-        end)
-
-        send("__ready")
-        send("__meta:" .. metaPayload)
     end)
-    if not ok then
+
+    if not ok or not ws then
+        connecting = false
+        connected = false
+        ws = nil
+        return
+    end
+
+    ws.OnClose:Connect(function()
         connected = false
         connecting = false
         ws = nil
-    end
+    end)
+
+    ws.OnMessage:Connect(function(msg)
+        if msg == "ping" then
+            send("pong")
+            return
+        end
+        local fn, loadErr = loadstring(msg)
+        if fn then
+            local ok2, execErr = pcall(fn)
+            if not ok2 then send("__error:" .. tostring(execErr)) end
+        else
+            send("__error:syntax:" .. tostring(loadErr))
+        end
+    end)
+
+    task.wait(0.3)
+
+    connected = true
+    connecting = false
+
+    send("__ready")
+
+    task.wait(0.1)
+
+    send("__meta:" .. metaPayload)
 end
 
 task.spawn(function()
@@ -132,11 +143,11 @@ task.spawn(function()
     while true do
         if not connected and not connecting then
             connect()
-            if not connected then
+            if connected then
+                retryDelay = 3
+            else
                 task.wait(retryDelay)
                 retryDelay = math.min(retryDelay + 2, 15)
-            else
-                retryDelay = 3
             end
         end
         task.wait(1)
