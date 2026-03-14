@@ -44,13 +44,13 @@ class OverlayService : Service() {
         const val AUTOEXEC_FILE = ".AWP_SESSION.lua"
 
         val KNOWN_EXECUTOR_PATHS = listOf(
-            "Delta"     to listOf("Delta/Scripts", "Delta/Autoexecute", "Delta/workspace"),
-            "Hydrogen"  to listOf("Hydrogen/scripts", "Hydrogen/autoexec", "Hydrogen/workspace"),
-            "Fluxus"    to listOf("Fluxus/scripts", "Fluxus/autoexec", "Fluxus/workspace"),
-            "Codex"     to listOf("Codex/scripts", "Codex/autoexec", "Codex/workspace"),
-            "Arceus"    to listOf("AceusX/scripts", "AceusX/autoexec"),
-            "Solara"    to listOf("Solara/scripts", "Solara/autoexec"),
-            "Wave"      to listOf("Wave/scripts",   "Wave/autoexec"),
+            "Delta"    to listOf("Delta/Scripts",    "Delta/Autoexecute"),
+            "Hydrogen" to listOf("Hydrogen/scripts", "Hydrogen/autoexec"),
+            "Fluxus"   to listOf("Fluxus/scripts",   "Fluxus/autoexec"),
+            "Codex"    to listOf("Codex/scripts",    "Codex/autoexec"),
+            "Arceus"   to listOf("AceusX/scripts",   "AceusX/autoexec"),
+            "Solara"   to listOf("Solara/scripts",   "Solara/autoexec"),
+            "Wave"     to listOf("Wave/scripts",     "Wave/autoexec"),
         )
     }
 
@@ -60,16 +60,12 @@ class OverlayService : Service() {
     private lateinit var model: OverlayModel
 
     private var params: WindowManager.LayoutParams? = null
-    private var initialX = 0
-    private var initialY = 0
-    private var initialTouchX = 0f
-    private var initialTouchY = 0f
+    private var initialX = 0; private var initialY = 0
+    private var initialTouchX = 0f; private var initialTouchY = 0f
     private var isLocked = false
 
-    private var initialW = 0
-    private var initialH = 0
-    private var resizeTouchX = 0f
-    private var resizeTouchY = 0f
+    private var initialW = 0; private var initialH = 0
+    private var resizeTouchX = 0f; private var resizeTouchY = 0f
     private var isResizing = false
 
     private var detectedExecutorName = "Unknown"
@@ -78,13 +74,11 @@ class OverlayService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun dpToPx(dp: Int): Int =
-        (dp * resources.displayMetrics.density).toInt()
+    private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 
     private fun getScreenSize(): Pair<Int, Int> =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val b = wm.currentWindowMetrics.bounds
-            Pair(b.width(), b.height())
+            val b = wm.currentWindowMetrics.bounds; Pair(b.width(), b.height())
         } else {
             val dm = DisplayMetrics()
             @Suppress("DEPRECATION") wm.defaultDisplay.getMetrics(dm)
@@ -102,33 +96,28 @@ class OverlayService : Service() {
         return "127.0.0.1"
     }
 
-    private fun buildLoadstring(): String {
-        val ip = getLocalIp()
-        return "loadstring(game:HttpGet(\"http://$ip:$HTTP_PORT/session/script\"))()"
-    }
+    private fun buildLoadstring() = "loadstring(game:HttpGet(\"http://${getLocalIp()}:$HTTP_PORT/session/script\"))()"
 
     private fun detectExecutor() {
         val base = Environment.getExternalStorageDirectory()
         for ((name, paths) in KNOWN_EXECUTOR_PATHS) {
-            val scriptsCandidate = paths.firstOrNull { it.contains("script", ignoreCase = true) } ?: continue
-            if (File(base, scriptsCandidate).exists()) {
+            val scripts = paths.firstOrNull { it.contains("script", ignoreCase = true) } ?: continue
+            if (File(base, scripts).exists()) {
                 detectedExecutorName = name
-                detectedScriptsPath = "/sdcard/$scriptsCandidate"
-                val autoCandidate = paths.firstOrNull { it.contains("auto", ignoreCase = true) } ?: ""
-                detectedAutoexecPath = if (autoCandidate.isNotEmpty()) "/sdcard/$autoCandidate" else ""
+                detectedScriptsPath = "/sdcard/$scripts"
+                val auto = paths.firstOrNull { it.contains("auto", ignoreCase = true) } ?: ""
+                detectedAutoexecPath = if (auto.isNotEmpty()) "/sdcard/$auto" else ""
                 return
             }
         }
+        detectedExecutorName = "Unknown"
         detectedScriptsPath = "/sdcard/Delta/Scripts"
         detectedAutoexecPath = "/sdcard/Delta/Autoexecute"
     }
 
     private fun writeAutoexecSession() {
         try {
-            val dir = if (detectedAutoexecPath.isNotEmpty())
-                File(detectedAutoexecPath)
-            else
-                File(Environment.getExternalStorageDirectory(), "Delta/Autoexecute")
+            val dir = File(if (detectedAutoexecPath.isNotEmpty()) detectedAutoexecPath else "/sdcard/Delta/Autoexecute")
             if (!dir.exists()) dir.mkdirs()
             File(dir, AUTOEXEC_FILE).writeText(buildLoadstring())
         } catch (_: Exception) {}
@@ -136,26 +125,26 @@ class OverlayService : Service() {
 
     private fun copyToClipboard() {
         try {
-            val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            cm.setPrimaryClip(ClipData.newPlainText("AWP", buildLoadstring()))
+            (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                .setPrimaryClip(ClipData.newPlainText("AWP", buildLoadstring()))
         } catch (_: Exception) {}
     }
+
+    private fun getAwpWorkspaceDir(): File =
+        File(Environment.getExternalStorageDirectory(), "Delta/workspace/AWPM").also { if (!it.exists()) it.mkdirs() }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate() {
         super.onCreate()
         running = true
-
         model = OverlayModel(application)
         model.start()
 
         wm = getSystemService(WINDOW_SERVICE) as WindowManager
         val (screenW, screenH) = getScreenSize()
-
         val overlayW = minOf(dpToPx(OVERLAY_W_DP), screenW)
         val overlayH = minOf(dpToPx(OVERLAY_H_DP), screenH)
-        initialW = overlayW
-        initialH = overlayH
+        initialW = overlayW; initialH = overlayH
 
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -176,18 +165,15 @@ class OverlayService : Service() {
         overlayView = FrameLayout(this)
         wv = WebView(this).apply {
             layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT
             )
         }
-
         setupWebView()
         (overlayView as FrameLayout).addView(wv)
         setupDrag()
         wm.addView(overlayView, params)
         startForeground(NOTIF_ID, buildNotification())
         observeModel()
-
         detectExecutor()
         writeAutoexecSession()
         copyToClipboard()
@@ -202,9 +188,7 @@ class OverlayService : Service() {
             @Suppress("DEPRECATION") allowUniversalAccessFromFileURLs = true
             cacheMode = WebSettings.LOAD_NO_CACHE
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            setSupportZoom(false)
-            builtInZoomControls = false
-            displayZoomControls = false
+            setSupportZoom(false); builtInZoomControls = false; displayZoomControls = false
         }
         wv.webChromeClient = WebChromeClient()
         wv.webViewClient = WebViewClient()
@@ -216,33 +200,22 @@ class OverlayService : Service() {
     private fun setupDrag() {
         wv.setOnTouchListener { _, event ->
             if (isLocked) return@setOnTouchListener false
-
             val p = params ?: return@setOnTouchListener false
-            val w = p.width
-            val h = p.height
-            val edgeSize = dpToPx(24)
-            val inResizeZone = event.x > w - edgeSize && event.y > h - edgeSize
-
+            val edgePx = dpToPx(24)
+            val inResize = event.x > p.width - edgePx && event.y > p.height - edgePx
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     initialX = p.x; initialY = p.y
                     initialTouchX = event.rawX; initialTouchY = event.rawY
-                    if (inResizeZone) {
-                        isResizing = true
-                        initialW = w; initialH = h
-                        resizeTouchX = event.rawX; resizeTouchY = event.rawY
-                    } else {
-                        isResizing = false
-                    }
+                    isResizing = inResize
+                    if (isResizing) { initialW = p.width; initialH = p.height; resizeTouchX = event.rawX; resizeTouchY = event.rawY }
                     false
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (isResizing) {
-                        val (screenW, screenH) = getScreenSize()
-                        val minW = dpToPx(280); val minH = dpToPx(220)
-                        val newW = (initialW + (event.rawX - resizeTouchX).toInt()).coerceIn(minW, screenW)
-                        val newH = (initialH + (event.rawY - resizeTouchY).toInt()).coerceIn(minH, screenH)
-                        p.width = newW; p.height = newH
+                        val (sw, sh) = getScreenSize()
+                        p.width = ((initialW + (event.rawX - resizeTouchX)).toInt()).coerceIn(dpToPx(280), sw)
+                        p.height = ((initialH + (event.rawY - resizeTouchY)).toInt()).coerceIn(dpToPx(220), sh)
                         try { wm.updateViewLayout(overlayView, p) } catch (_: Exception) {}
                         true
                     } else {
@@ -264,61 +237,35 @@ class OverlayService : Service() {
     private fun observeModel() {
         model.isConnected.observeForever { c ->
             val s = if (c) "connected" else "disconnected"
-            wv.post {
-                wv.evaluateJavascript(
-                    "window.dispatchEvent(new CustomEvent('awp:status',{detail:'$s'}))", null
-                )
-            }
+            wv.post { wv.evaluateJavascript("window.dispatchEvent(new CustomEvent('awp:status',{detail:'$s'}))", null) }
         }
         model.outputLog.observeForever { logs ->
             if (logs.isNotEmpty()) {
                 val raw = logs.last()
                 if (raw.startsWith("__meta:")) {
                     val json = escJs(raw.removePrefix("__meta:"))
-                    wv.post {
-                        wv.evaluateJavascript(
-                            "window.dispatchEvent(new CustomEvent('awp:meta',{detail:$json}))", null
-                        )
-                    }
+                    wv.post { wv.evaluateJavascript("window.dispatchEvent(new CustomEvent('awp:meta',{detail:$json}))", null) }
                     return@observeForever
                 }
-                val colonIdx = raw.indexOf(":")
-                val type: String
-                val content: String
-                if (colonIdx in 1..9) {
-                    type = raw.substring(0, colonIdx)
-                    content = raw.substring(colonIdx + 1)
-                } else {
-                    type = "print"; content = raw
-                }
+                val ci = raw.indexOf(":")
+                val type = if (ci in 1..9) raw.substring(0, ci) else "print"
+                val content = if (ci in 1..9) raw.substring(ci + 1) else raw
                 val safe = escJs(content)
-                wv.post {
-                    wv.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('awp:output',{detail:{type:'$type',msg:'$safe'}}))",
-                        null
-                    )
-                }
+                wv.post { wv.evaluateJavascript("window.dispatchEvent(new CustomEvent('awp:output',{detail:{type:'$type',msg:'$safe'}}))", null) }
             }
         }
     }
 
-    private fun escJs(s: String) = s
-        .replace("\\", "\\\\").replace("'", "\\'")
-        .replace("\n", "\\n").replace("\r", "")
-
-    private fun getDeltaDir(): File =
-        File(Environment.getExternalStorageDirectory(), "Delta")
+    private fun escJs(s: String) = s.replace("\\","\\\\").replace("'","\\'").replace("\n","\\n").replace("\r","")
 
     private fun readFolder(path: String): String {
         val dir = File(path)
         if (!dir.exists() || !dir.isDirectory) return "[]"
         val arr = JSONArray()
         dir.listFiles()
-            ?.filter { it.isFile && it.extension in listOf("lua", "luau", "txt") }
+            ?.filter { it.isFile && it.extension in listOf("lua","luau","txt") }
             ?.sortedBy { it.name }
-            ?.forEach { f ->
-                arr.put(JSONObject().apply { put("name", f.name); put("content", f.readText()) })
-            }
+            ?.forEach { f -> arr.put(JSONObject().apply { put("name", f.name); put("content", f.readText()) }) }
         return arr.toString()
     }
 
@@ -326,27 +273,21 @@ class OverlayService : Service() {
         @JavascriptInterface fun executeScript(s: String) = model.executeScript(s)
         @JavascriptInterface fun clearOutput() = model.clearOutput()
         @JavascriptInterface fun isConnected(): Boolean = model.isConnected.value == true
-
         @JavascriptInterface fun minimize() { wv.post { overlayView.visibility = View.GONE } }
         @JavascriptInterface fun maximize() { wv.post { overlayView.visibility = View.VISIBLE } }
         @JavascriptInterface fun closeApp() { wv.post { stopSelf() } }
-
-        @JavascriptInterface fun setLocked(locked: Boolean) { isLocked = locked }
+        @JavascriptInterface fun setLocked(on: Boolean) { isLocked = on }
         @JavascriptInterface fun isLocked(): Boolean = isLocked
 
         @JavascriptInterface fun reattach() {
-            detectExecutor()
-            writeAutoexecSession()
-            copyToClipboard()
+            detectExecutor(); writeAutoexecSession(); copyToClipboard()
         }
 
         @JavascriptInterface fun setTopmost(on: Boolean) {
             wv.post {
                 val p = params ?: return@post
-                p.flags = if (on)
-                    p.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                else
-                    p.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+                p.flags = if (on) p.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                          else p.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
                 try { wm.updateViewLayout(overlayView, p) } catch (_: Exception) {}
             }
         }
@@ -360,18 +301,17 @@ class OverlayService : Service() {
         @JavascriptInterface fun getAutoexecPath(): String = detectedAutoexecPath
 
         @JavascriptInterface fun getWorkspaceFiles(): String =
-            readFolder(if (detectedScriptsPath.isNotEmpty()) detectedScriptsPath
-                       else "/sdcard/Delta/Scripts")
+            readFolder(detectedScriptsPath.ifEmpty { "/sdcard/Delta/Scripts" })
 
         @JavascriptInterface fun getAutoexecFiles(): String =
-            readFolder(if (detectedAutoexecPath.isNotEmpty()) detectedAutoexecPath
-                       else "/sdcard/Delta/Autoexecute")
+            readFolder(detectedAutoexecPath.ifEmpty { "/sdcard/Delta/Autoexecute" })
 
         @JavascriptInterface fun saveWorkspaceFile(name: String, content: String) {
-            try {
-                val ws = File(getDeltaDir(), "workspace/AWPM").also { if (!it.exists()) it.mkdirs() }
-                File(ws, name).writeText(content)
-            } catch (_: Exception) {}
+            try { File(getAwpWorkspaceDir(), name).writeText(content) } catch (_: Exception) {}
+        }
+
+        @JavascriptInterface fun readWorkspaceFile(name: String): String? {
+            return try { File(getAwpWorkspaceDir(), name).takeIf { it.exists() }?.readText() } catch (_: Exception) { null }
         }
 
         @JavascriptInterface fun openFilePicker() {}
@@ -381,41 +321,31 @@ class OverlayService : Service() {
             try {
                 File(path).mkdirs()
                 startActivity(Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse("file://$path")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    data = Uri.parse("file://$path"); flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
             } catch (_: Exception) {}
         }
     }
 
     private fun buildNotification(): Notification {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
-                .createNotificationChannel(
-                    NotificationChannel(NOTIF_CHANNEL, "AWP Overlay", NotificationManager.IMPORTANCE_LOW)
-                        .apply { description = "AWP floating window" }
-                )
-        }
+                .createNotificationChannel(NotificationChannel(NOTIF_CHANNEL, "AWP Overlay", NotificationManager.IMPORTANCE_LOW)
+                    .apply { description = "AWP floating window" })
+
         val showIntent = PendingIntent.getService(
             this, 0,
             Intent(this, OverlayService::class.java).setAction("SHOW_OVERLAY"),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             Notification.Builder(this, NOTIF_CHANNEL)
-                .setContentTitle("AWP.GG")
-                .setContentText("Toque para mostrar a janela")
-                .setSmallIcon(android.R.drawable.ic_menu_view)
-                .setContentIntent(showIntent)
-                .setOngoing(true).build()
-        } else {
-            @Suppress("DEPRECATION")
+                .setContentTitle("AWP.GG").setContentText("Toque para mostrar a janela")
+                .setSmallIcon(android.R.drawable.ic_menu_view).setContentIntent(showIntent).setOngoing(true).build()
+        else @Suppress("DEPRECATION")
             Notification.Builder(this)
-                .setContentTitle("AWP.GG")
-                .setContentText("Toque para mostrar a janela")
-                .setSmallIcon(android.R.drawable.ic_menu_view)
-                .setOngoing(true).build()
-        }
+                .setContentTitle("AWP.GG").setContentText("Toque para mostrar a janela")
+                .setSmallIcon(android.R.drawable.ic_menu_view).setOngoing(true).build()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
