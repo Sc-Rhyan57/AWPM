@@ -3,49 +3,15 @@ local Players = game:GetService("Players")
 
 local ws = nil
 local connected = false
-
-local function send(msg)
-    if ws and connected then
-        pcall(function() ws:Send(msg) end)
-    end
-end
-
-local function destroyDeltaGui(inst)
-    pcall(function()
-        for _, child in ipairs(inst:GetChildren()) do
-            if child.Name == "Executor" then
-                pcall(function()
-                    if child.Parent == gethui() then child:Destroy()
-                    else child.Parent:Destroy() end
-                end)
-                return
-            end
-            destroyDeltaGui(child)
-        end
-    end)
-end
-
-pcall(function()
-    local hgui = gethui()
-    destroyDeltaGui(hgui)
-    for _, v in ipairs(hgui:GetChildren()) do
-        local n = v.Name:lower()
-        if n:find("delta") or n:find("executor") or n:find("exploit") or n:find("injector") then
-            pcall(function() v:Destroy() end)
-        end
-    end
-end)
+local connecting = false
 
 local execName = "Unknown"
 pcall(function()
     execName = (identifyexecutor and identifyexecutor()) or
-               (getexecutorname and getexecutorname()) or
-               "Unknown"
+               (getexecutorname and getexecutorname()) or "Unknown"
 end)
 
-local userId = 0
-local displayName = ""
-local username = ""
+local userId, displayName, username = 0, "", ""
 pcall(function()
     local lp = Players.LocalPlayer
     userId = lp.UserId
@@ -60,24 +26,50 @@ local metaPayload = HttpService:JSONEncode({
     username = username
 })
 
+pcall(function()
+    local hgui = gethui()
+    local function destroyExec(inst)
+        for _, c in ipairs(inst:GetChildren()) do
+            if c.Name == "Executor" then
+                pcall(function()
+                    if c.Parent == hgui then c:Destroy() else c.Parent:Destroy() end
+                end)
+                return
+            end
+            destroyExec(c)
+        end
+    end
+    destroyExec(hgui)
+    for _, v in ipairs(hgui:GetChildren()) do
+        local n = v.Name:lower()
+        if n:find("delta") or n:find("executor") or n:find("exploit") or n:find("injector") then
+            pcall(function() v:Destroy() end)
+        end
+    end
+end)
+
 local rawPrint = print
 local rawWarn  = warn
 local rawError = error
 
+local function send(msg)
+    if ws and connected then
+        pcall(function() ws:Send(msg) end)
+    end
+end
+
 print = function(...)
     local parts = {}
     for i = 1, select('#', ...) do parts[i] = tostring(select(i, ...)) end
-    local out = table.concat(parts, "\t")
     pcall(rawPrint, ...)
-    send("__console:print:" .. out)
+    send("__console:print:" .. table.concat(parts, "\t"))
 end
 
 warn = function(...)
     local parts = {}
     for i = 1, select('#', ...) do parts[i] = tostring(select(i, ...)) end
-    local out = table.concat(parts, "\t")
     pcall(rawWarn, ...)
-    send("__console:warn:" .. out)
+    send("__console:warn:" .. table.concat(parts, "\t"))
 end
 
 error = function(msg, level)
@@ -85,26 +77,26 @@ error = function(msg, level)
     pcall(rawError, msg, level or 1)
 end
 
-local ok, ls = pcall(function() return game:GetService("LogService") end)
-if ok and ls then
-    pcall(function()
-        ls.MessageOut:Connect(function(message, msgType)
-            local types = {
-                [Enum.MessageType.MessageOutput]  = "print",
-                [Enum.MessageType.MessageInfo]    = "info",
-                [Enum.MessageType.MessageWarning] = "warn",
-                [Enum.MessageType.MessageError]   = "error",
-            }
-            local t = types[msgType] or "print"
-            send("__console:" .. t .. ":" .. tostring(message))
-        end)
+pcall(function()
+    local ls = game:GetService("LogService")
+    local types = {
+        [Enum.MessageType.MessageOutput]  = "print",
+        [Enum.MessageType.MessageInfo]    = "info",
+        [Enum.MessageType.MessageWarning] = "warn",
+        [Enum.MessageType.MessageError]   = "error",
+    }
+    ls.MessageOut:Connect(function(message, msgType)
+        send("__console:" .. (types[msgType] or "print") .. ":" .. tostring(message))
     end)
-end
+end)
 
 local function connect()
-    pcall(function()
+    if connecting or connected then return end
+    connecting = true
+    local ok = pcall(function()
         ws = WebSocket.connect("ws://127.0.0.1:9999")
         connected = true
+        connecting = false
 
         ws.OnMessage:Connect(function(msg)
             if msg == "ping" then
@@ -127,21 +119,26 @@ local function connect()
 
         send("__ready")
         send("__meta:" .. metaPayload)
-
-        task.spawn(function()
-            while connected do
-                task.wait(4)
-                send("pong")
-            end
-        end)
     end)
+    if not ok then
+        connected = false
+        connecting = false
+        ws = nil
+    end
 end
 
 task.spawn(function()
+    local retryDelay = 3
     while true do
-        if not connected then
+        if not connected and not connecting then
             connect()
+            if not connected then
+                task.wait(retryDelay)
+                retryDelay = math.min(retryDelay + 2, 15)
+            else
+                retryDelay = 3
+            end
         end
-        task.wait(3)
+        task.wait(1)
     end
 end)
