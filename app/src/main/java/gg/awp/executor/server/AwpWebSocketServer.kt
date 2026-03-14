@@ -7,6 +7,8 @@ import org.java_websocket.handshake.ClientHandshake
 import org.java_websocket.server.WebSocketServer
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.util.Timer
+import java.util.TimerTask
 
 class AwpWebSocketServer(
     private val context: Context,
@@ -16,34 +18,40 @@ class AwpWebSocketServer(
 ) : WebSocketServer(InetSocketAddress(9999)) {
 
     private var activeClient: WebSocket? = null
-    private val tag = "AwpWebSocketServer"
+    private val tag = "AwpWsServer"
+    private var pingTimer: Timer? = null
 
     override fun onOpen(conn: WebSocket, handshake: ClientHandshake) {
         activeClient = conn
         onClientConnected()
+        startPingTimer()
         Log.d(tag, "Client connected: ${conn.remoteSocketAddress}")
     }
 
     override fun onClose(conn: WebSocket, code: Int, reason: String, remote: Boolean) {
         if (activeClient == conn) {
             activeClient = null
+            stopPingTimer()
+            onClientDisconnected()
         }
-        onClientDisconnected()
-        Log.d(tag, "Client disconnected: code=$code reason=$reason")
+        Log.d(tag, "Client disconnected: code=$code reason=$reason remote=$remote")
     }
 
     override fun onMessage(conn: WebSocket, message: String) {
         when {
-            message == "ping" -> conn.send("pong")
-            message == "__ready" -> Log.d(tag, "Roblox executor ready")
+            message == "pong" -> {}
+            message == "__ready" -> {
+                Log.d(tag, "Executor ready")
+                onScriptOutput("sys:Executor conectado")
+            }
             message.startsWith("__console:") -> {
-                val payload = message.removePrefix("__console:")
-                onScriptOutput(payload)
+                onScriptOutput(message.removePrefix("__console:"))
             }
             message.startsWith("__error:") -> {
-                val error = message.removePrefix("__error:")
-                Log.e(tag, "Script error: $error")
-                onScriptOutput("error:$error")
+                onScriptOutput("error:${message.removePrefix("__error:")}")
+            }
+            message.startsWith("__meta:") -> {
+                onScriptOutput(message)
             }
             else -> onScriptOutput(message)
         }
@@ -52,22 +60,46 @@ class AwpWebSocketServer(
     override fun onMessage(conn: WebSocket, message: ByteBuffer) {}
 
     override fun onError(conn: WebSocket?, ex: Exception) {
-        Log.e(tag, "WebSocket error", ex)
+        Log.e(tag, "WebSocket error: ${ex.message}")
     }
 
     override fun onStart() {
+        connectionLostTimeout = 0
         Log.d(tag, "WebSocket server started on port 9999")
-        connectionLostTimeout = 30
     }
 
     fun executeScript(script: String) {
         val client = activeClient
         if (client != null && client.isOpen) {
             client.send(script)
-        } else {
-            Log.w(tag, "No active client to execute script")
         }
     }
 
-    fun isClientConnected(): Boolean = activeClient != null && activeClient!!.isOpen
+    fun isClientConnected(): Boolean = activeClient?.isOpen == true
+
+    private fun startPingTimer() {
+        stopPingTimer()
+        pingTimer = Timer().apply {
+            scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    val client = activeClient
+                    if (client != null && client.isOpen) {
+                        try { client.send("ping") } catch (_: Exception) {}
+                    } else {
+                        stopPingTimer()
+                    }
+                }
+            }, 10_000L, 10_000L)
+        }
+    }
+
+    private fun stopPingTimer() {
+        pingTimer?.cancel()
+        pingTimer = null
+    }
+
+    override fun stop() {
+        stopPingTimer()
+        super.stop()
+    }
 }
