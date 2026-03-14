@@ -10,12 +10,11 @@
   --bg0:#0d0d0d;--bg1:#141414;--bg2:#1a1a1a;--bg3:#202020;--bg4:#272727;
   --b1:#2c2c2c;--b2:#333;--b3:#3d3d3d;
   --t1:#d4d4d4;--t2:#888;--t3:#555;
-  --green:#4ec94e;--red:#e05555;--blue:#4a9eff;--yellow:#e2c96e;--orange:#e09050;
+  --green:#4ec94e;--red:#e05555;--blue:#4a9eff;--yellow:#e2c96e;
   --btn:#232323;--bth:#2d2d2d;
 }
 html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--t1)}
 .app{display:flex;flex-direction:column;height:100vh}
-
 .tbar{display:flex;align-items:center;justify-content:space-between;height:38px;padding:0 10px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0;cursor:grab;touch-action:none}
 .tbar:active{cursor:grabbing}
 .tbl{display:flex;align-items:center;gap:8px}
@@ -42,7 +41,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .wcb.x:hover{background:var(--red);color:#fff}
 .wcb.lk.locked{color:var(--yellow)}
 .wcb svg{width:11px;height:11px}
-
 .main{display:flex;flex:1;overflow:hidden}
 .sb{width:40px;background:var(--bg1);border-right:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px;flex-shrink:0}
 .sbb{width:28px;height:28px;border:none;background:none;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .12s}
@@ -51,10 +49,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .content{flex:1;display:flex;overflow:hidden}
 .view{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .view.hidden{display:none}
-
 .earea{flex:1;display:flex;overflow:hidden}
 .epane{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--b1)}
-
 .tbar2{display:flex;align-items:center;height:34px;background:var(--bg1);border-bottom:1px solid var(--b1);padding:0 6px;gap:2px;flex-shrink:0;overflow-x:auto;overflow-y:hidden}
 .tbar2::-webkit-scrollbar{height:2px}
 .tbar2::-webkit-scrollbar-thumb{background:var(--b2)}
@@ -68,9 +64,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .tadd{width:22px;height:22px;border:none;background:none;border-radius:4px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;flex-shrink:0;transition:all .1s}
 .tadd:hover{background:var(--bg3);color:var(--t1)}
 .trename{background:var(--bg3);border:1px solid var(--blue);border-radius:3px;color:var(--t1);font-size:11.5px;padding:0 4px;height:20px;outline:none;width:90px;-webkit-user-select:text;user-select:text}
-
 #mc{flex:1;overflow:hidden;background:var(--bg0)}
-
 .ctrl{display:flex;align-items:center;gap:5px;padding:6px 9px;background:var(--bg1);border-top:1px solid var(--b1);flex-shrink:0;flex-wrap:wrap}
 .cb{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:5px;background:var(--btn);border:1px solid var(--b2);color:var(--t2);font-size:11.5px;cursor:pointer;transition:all .12s;white-space:nowrap}
 .cb:hover:not(:disabled){background:var(--bth);color:var(--t1);border-color:var(--b3)}
@@ -82,7 +76,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .ib{width:28px;height:28px;border:none;background:none;border-radius:4px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}
 .ib:hover{background:var(--bg3);color:var(--t1)}
 .ib svg{width:17px;height:17px}
-
 .rp{width:190px;background:var(--bg1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
 .sw{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--b1)}
 .sw svg{width:12px;height:12px;color:var(--t3);flex-shrink:0}
@@ -102,7 +95,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .fi:hover{background:var(--bg2);color:var(--t1)}
 .fi svg{width:12px;height:12px;flex-shrink:0}
 .wsempty{padding:10px 14px;color:var(--t3);font-size:11px}
-
 .op{background:var(--bg1);border-top:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;transition:height .18s ease}
 .op.exp{height:130px}
 .op.col{height:32px}
@@ -125,15 +117,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .ol.i .ol-prefix{color:var(--blue)}.ol.i .ol-msg{color:var(--blue)}
 .ol.ok .ol-prefix,.ol.ok .ol-msg{color:var(--green)}
 .ol.sys .ol-prefix,.ol.sys .ol-msg{color:var(--t3)}
-
 .ibar{display:flex;align-items:center;justify-content:flex-end;padding:3px 8px;background:var(--bg1);border-top:1px solid var(--b1);flex-shrink:0}
 .instb{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--t2);font-size:11.5px;cursor:pointer;padding:3px 6px;border-radius:4px;transition:all .1s}
 .instb:hover{background:var(--bg2);color:var(--t1)}
 .instb svg{width:12px;height:12px}
-
-.resize-handle{position:absolute;bottom:0;right:0;width:20px;height:20px;cursor:se-resize;z-index:10}
-.resize-handle::after{content:'';position:absolute;bottom:3px;right:3px;width:10px;height:10px;border-right:2px solid var(--b3);border-bottom:2px solid var(--b3);border-radius:1px}
-
 .stw{flex:1;overflow-y:auto}
 .stw::-webkit-scrollbar{width:3px}
 .stw::-webkit-scrollbar-thumb{background:var(--b2)}
@@ -149,7 +136,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .stb.red:hover{background:#2a1010}
 .stb.on{border-color:#2d5a2d;color:var(--green)}
 .stb.on:hover{background:#1a2e1a}
-
 .accw{flex:1;overflow-y:auto}
 .accw::-webkit-scrollbar{width:3px}
 .accw::-webkit-scrollbar-thumb{background:var(--b2)}
@@ -159,7 +145,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .acc-av svg{width:28px;height:28px;color:var(--t3)}
 .acc-name{font-size:14px;font-weight:600;margin-bottom:3px}
 .acc-sub{font-size:11.5px;color:var(--t2)}
-.acc-sub.on{color:var(--green)}
 .acc-search{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--b1)}
 .acc-inp{flex:1;background:var(--bg2);border:1px solid var(--b2);border-radius:5px;color:var(--t1);font-size:12px;padding:5px 9px;outline:none;transition:border .1s;-webkit-user-select:text;user-select:text}
 .acc-inp:focus{border-color:var(--blue)}
@@ -172,17 +157,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .acc-val.mono{font-family:monospace;font-size:10.5px;color:var(--t3)}
 .acc-loading{padding:20px 16px;text-align:center;color:var(--t3);font-size:12px}
 .acc-err{padding:10px 16px;color:var(--red);font-size:11.5px}
-
 .ctx{position:fixed;background:var(--bg2);border:1px solid var(--b2);border-radius:6px;z-index:1000;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;overflow:hidden}
 .ctx.show{display:block}
 .cxi{padding:7px 12px;font-size:12px;color:var(--t2);cursor:pointer;transition:all .1s}
 .cxi:hover{background:var(--bg3);color:var(--t1)}
 .cxi.danger{color:var(--red)}
 .cxi.danger:hover{background:#2a1010}
-
 .toast{position:fixed;bottom:55px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--b2);border-radius:6px;padding:7px 14px;font-size:11.5px;color:var(--t1);z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
-
 #ld{position:fixed;inset:0;background:var(--bg0);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:10px}
 #ld.gone{display:none}
 .sp{width:22px;height:22px;border:2px solid var(--b2);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite}
@@ -217,8 +199,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
     <div class="tbr">
       <div class="sdot" id="sd"></div>
       <div class="wc">
-        <button class="wcb lk" id="lockBtn" onclick="toggleLock()" title="Lock/Unlock window">
-          <svg id="lockIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <button class="wcb lk" id="lockBtn" onclick="toggleLock()" title="Lock window">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </button>
         <button class="wcb" onclick="doMin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
         <button class="wcb" onclick="doMax()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/></svg></button>
@@ -229,15 +211,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 
   <div class="main">
     <div class="sb">
-      <button class="sbb active" id="sbs" onclick="goView('s')" title="Scripting">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      </button>
-      <button class="sbb" id="sbg" onclick="goView('g')" title="Settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-      </button>
-      <button class="sbb" id="sba" onclick="goView('a')" title="Account">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </button>
+      <button class="sbb active" id="sbs" onclick="goView('s')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
+      <button class="sbb" id="sbg" onclick="goView('g')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></button>
+      <button class="sbb" id="sba" onclick="goView('a')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
     </div>
 
     <div class="content">
@@ -308,64 +284,32 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 
       <div class="view hidden" id="VG">
         <div class="stw">
-          <div class="stt">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-            General
-          </div>
-          <div class="sti">
-            <div class="stin"><div class="stn">Reset State</div><div class="std">Clears all local AWP data and settings.</div></div>
-            <button class="stb" onclick="doResetState()">Reset</button>
-          </div>
-          <div class="sti">
-            <div class="stin"><div class="stn">Spoof Hardware ID</div><div class="std">Hooks RbxAnalyticsService to return a fake HWID in-game.</div></div>
-            <button class="stb red" onclick="doSpoofHwid()">Spoof</button>
-          </div>
-          <div class="sti">
-            <div class="stin"><div class="stn">Autoexec</div><div class="std">Run all scripts in autoexec folder on executor attach.</div></div>
-            <button class="stb" id="aeBtn" onclick="toggleAutoexec()">Enable</button>
-          </div>
-          <div class="sti">
-            <div class="stin"><div class="stn" id="tmN">Toggle topmost: Off</div><div class="std">Keep the AWP window always on top of other apps.</div></div>
-            <button class="stb" id="tmB" onclick="doTopmost()">Enable</button>
-          </div>
-          <div class="sti">
-            <div class="stin"><div class="stn">Open Scripts folder</div><div class="std" id="scriptsPathLbl">/sdcard/Delta/Scripts</div></div>
-            <button class="stb" onclick="openFolder(scriptsPath)">Open</button>
-          </div>
-          <div class="sti">
-            <div class="stin"><div class="stn">Open Autoexecute folder</div><div class="std" id="autoexecPathLbl">/sdcard/Delta/Autoexecute</div></div>
-            <button class="stb" onclick="openFolder(autoexecPath)">Open</button>
-          </div>
-          <div class="sti">
-            <div class="stin"><div class="stn">Reload Scripts</div><div class="std">Reload scripts from executor scripts folder.</div></div>
-            <button class="stb" onclick="reloadWs()">Reload</button>
-          </div>
+          <div class="stt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>General</div>
+          <div class="sti"><div class="stin"><div class="stn">Reset State</div><div class="std">Clears all local AWP data.</div></div><button class="stb" onclick="doResetState()">Reset</button></div>
+          <div class="sti"><div class="stin"><div class="stn">Spoof HWID</div><div class="std">Hooks RbxAnalyticsService to return a fake HWID.</div></div><button class="stb red" onclick="doSpoofHwid()">Spoof</button></div>
+          <div class="sti"><div class="stin"><div class="stn">Autoexec</div><div class="std">Run scripts in autoexec folder on attach.</div></div><button class="stb" id="aeBtn" onclick="toggleAutoexec()">Enable</button></div>
+          <div class="sti"><div class="stin"><div class="stn" id="tmN">Topmost: Off</div><div class="std">Keep AWP window always on top.</div></div><button class="stb" id="tmB" onclick="doTopmost()">Enable</button></div>
+          <div class="sti"><div class="stin"><div class="stn">Scripts folder</div><div class="std" id="scriptsPathLbl">/sdcard/Delta/Scripts</div></div><button class="stb" onclick="openFolder(scriptsPath)">Open</button></div>
+          <div class="sti"><div class="stin"><div class="stn">Autoexecute folder</div><div class="std" id="autoexecPathLbl">/sdcard/Delta/Autoexecute</div></div><button class="stb" onclick="openFolder(autoexecPath)">Open</button></div>
+          <div class="sti"><div class="stin"><div class="stn">Reload Scripts</div><div class="std">Reload from executor scripts folder.</div></div><button class="stb" onclick="reloadWs()">Reload</button></div>
         </div>
       </div>
 
       <div class="view hidden" id="VA">
         <div class="accw">
           <div class="acc-hero">
-            <div class="acc-av" id="accAv">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
+            <div class="acc-av" id="accAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <div class="acc-name" id="accName">—</div>
             <div class="acc-sub" id="accSub">Conecte o executor para carregar</div>
           </div>
-
           <div class="acc-search">
-            <input class="acc-inp" id="accInp" type="text" placeholder="Username ou User ID" maxlength="50"
-              onkeydown="if(event.key==='Enter')fetchUser()">
+            <input class="acc-inp" id="accInp" type="text" placeholder="Username ou User ID" maxlength="50" onkeydown="if(event.key==='Enter')fetchUser()">
             <button class="acc-sbtn" onclick="fetchUser()">Search</button>
           </div>
-
           <div id="accInfo">
-            <div class="acc-loading" id="accLoad" style="display:none">
-              <div class="sp" style="width:16px;height:16px;margin:0 auto 6px"></div>Loading...
-            </div>
+            <div class="acc-loading" id="accLoad" style="display:none"><div class="sp" style="width:16px;height:16px;margin:0 auto 6px"></div>Loading...</div>
             <div class="acc-err" id="accErr" style="display:none"></div>
           </div>
-
           <div class="acc-row"><span class="acc-lbl">Executor</span><span class="acc-val" id="accExec">Unknown</span></div>
           <div class="acc-row"><span class="acc-lbl">Connection</span><span class="acc-val" id="accConn">Disconnected</span></div>
           <div class="acc-row"><span class="acc-lbl">Scripts</span><span class="acc-val mono" id="accScripts">/sdcard/Delta/Scripts</span></div>
@@ -390,31 +334,43 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 <script>
 'use strict';
 var ed, mAPI;
-var conn=false, wsOpen=true, outOpen=true, topmostOn=false, autoexecOn=false, locked=false;
-var tabs=[], aid=null, tc=0, cxId=null, ttimer=null;
+var conn=false,wsOpen=true,outOpen=true,topmostOn=false,autoexecOn=false,locked=false;
+var tabs=[],aid=null,tc=0,cxId=null,ttimer=null;
 var scriptsPath='/sdcard/Delta/Scripts';
 var autoexecPath='/sdcard/Delta/Autoexecute';
 
-var wfiles=[
-  {name:'dex++.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()'},
-  {name:'GrabPart.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/dthecoolest/GrabPart/main/GrabPart.lua"))()'},
-  {name:'InfiniteYield.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()'},
-  {name:'output-test.lua',content:'print("Hello from AWP!")'},
-  {name:'Telekinesis.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/0zark/scripts/main/Telekinesis.lua"))()'},
-];
+var WS_KEY='awp_workspace';
+var TABS_KEY='awp_tabs';
+var STATE_KEY='awp_state';
+
+function nativeAvail(){return typeof AwpNative!=='undefined';}
+
+function persistWorkspace(){
+  if(!nativeAvail())return;
+  try{AwpNative.saveWorkspaceFile('__awp_wfiles.json',JSON.stringify(wfiles));}catch(e){}
+}
+
+function persistTabs(){
+  if(!nativeAvail())return;
+  try{
+    var data=tabs.map(function(t){return{id:t.id,name:t.name,content:t.id===aid&&ed?ed.getValue():t.content};});
+    AwpNative.saveWorkspaceFile('__awp_tabs.json',JSON.stringify({tabs:data,aid:aid}));
+  }catch(e){}
+}
+
+var wfiles=[];
 
 require.config({paths:{vs:'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs'}});
-require(['vs/editor/editor.main'], function(m){
+require(['vs/editor/editor.main'],function(m){
   mAPI=m;
   m.editor.defineTheme('awp',{
     base:'vs-dark',inherit:true,
     rules:[
       {token:'',foreground:'d4d4d4',background:'0d0d0d'},
       {token:'comment',foreground:'5c7a5c',fontStyle:'italic'},
-      {token:'keyword',foreground:'569cd6'},{token:'keyword.lua',foreground:'569cd6'},
-      {token:'number',foreground:'b5cea8'},{token:'string',foreground:'ce9178'},
-      {token:'identifier',foreground:'9cdcfe'},{token:'type.identifier',foreground:'4ec9b0'},
-      {token:'delimiter.bracket',foreground:'ffd700'},
+      {token:'keyword',foreground:'569cd6'},{token:'number',foreground:'b5cea8'},
+      {token:'string',foreground:'ce9178'},{token:'identifier',foreground:'9cdcfe'},
+      {token:'type.identifier',foreground:'4ec9b0'},{token:'delimiter.bracket',foreground:'ffd700'},
     ],
     colors:{
       'editor.background':'#0d0d0d','editor.foreground':'#d4d4d4',
@@ -441,7 +397,6 @@ require(['vs/editor/editor.main'], function(m){
     'Enum','TweenInfo.new','NumberSequence.new','ColorSequence.new',
     'NumberRange.new','Rect.new','Ray.new','Region3.new',
     'game:GetService','game.Players','game.Players.LocalPlayer',
-    'game.Players.LocalPlayer.Character','game.Players.LocalPlayer.PlayerGui',
     'game.Workspace','game.ReplicatedStorage','game.ServerStorage','game.Lighting',
     'RunService','UserInputService','TweenService','HttpService','LogService',
     'TweenService:Create','HttpService:JSONEncode','HttpService:JSONDecode',
@@ -464,7 +419,7 @@ require(['vs/editor/editor.main'], function(m){
     provideCompletionItems:function(model,pos){
       var w=model.getWordUntilPosition(pos);
       var r={startLineNumber:pos.lineNumber,endLineNumber:pos.lineNumber,startColumn:w.startColumn,endColumn:w.endColumn};
-      return {suggestions:rbx.map(function(k){return{label:k,kind:m.languages.CompletionItemKind.Function,insertText:k,range:r};})};
+      return{suggestions:rbx.map(function(k){return{label:k,kind:m.languages.CompletionItemKind.Function,insertText:k,range:r};})};
     }
   });
 
@@ -481,23 +436,75 @@ require(['vs/editor/editor.main'], function(m){
     acceptSuggestionOnEnter:'smart',folding:true,padding:{top:8,bottom:8},
   });
 
-  newTab('-- Welcome to AWP!');
-  renderWs();
-  loadDiskScripts();
+  loadPersistedState();
   initPaths();
 
   document.getElementById('ld').classList.add('gone');
   document.getElementById('app').style.display='flex';
 });
 
+function loadPersistedState(){
+  var loadedWfiles=false;
+  var loadedTabs=false;
+
+  if(nativeAvail()){
+    try{
+      var wf=AwpNative.readWorkspaceFile('__awp_wfiles.json');
+      if(wf){wfiles=JSON.parse(wf);loadedWfiles=true;}
+    }catch(e){}
+
+    try{
+      var tf=AwpNative.readWorkspaceFile('__awp_tabs.json');
+      if(tf){
+        var d=JSON.parse(tf);
+        if(d.tabs&&d.tabs.length>0){
+          tabs=d.tabs;
+          aid=d.aid||d.tabs[0].id;
+          tc=tabs.reduce(function(mx,t){var n=parseInt(t.id.replace('t',''));return n>mx?n:mx;},0);
+          var active=tabs.find(function(t){return t.id===aid;})||tabs[0];
+          if(ed)ed.setValue(active.content||'');
+          renderTabs();
+          loadedTabs=true;
+        }
+      }
+    }catch(e){}
+
+    try{
+      var diskFiles=AwpNative.getWorkspaceFiles();
+      if(diskFiles){
+        var parsed=JSON.parse(diskFiles);
+        parsed.forEach(function(f){
+          var ex=wfiles.findIndex(function(x){return x.name===f.name;});
+          if(ex>=0)wfiles[ex]=f;else wfiles.push(f);
+        });
+      }
+    }catch(e){}
+  }
+
+  if(!loadedWfiles){
+    wfiles=[
+      {name:'dex++.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()'},
+      {name:'GrabPart.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/dthecoolest/GrabPart/main/GrabPart.lua"))()'},
+      {name:'InfiniteYield.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()'},
+      {name:'output-test.lua',content:'print("Hello from AWP!")'},
+      {name:'Telekinesis.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/0zark/scripts/main/Telekinesis.lua"))()'},
+    ];
+  }
+
+  if(!loadedTabs){newTab('-- Welcome to AWP!');}
+  renderWs();
+}
+
 function initPaths(){
-  if(typeof AwpNative==='undefined')return;
-  var sp=AwpNative.getScriptsPath();
-  var ap=AwpNative.getAutoexecPath();
-  var ex=AwpNative.getDetectedExecutor();
-  if(sp){scriptsPath=sp;document.getElementById('scriptsPathLbl').textContent=sp;document.getElementById('accScripts').textContent=sp;}
-  if(ap){autoexecPath=ap;document.getElementById('autoexecPathLbl').textContent=ap;document.getElementById('accAutoexec').textContent=ap;}
-  if(ex){document.getElementById('accExec').textContent=ex;document.getElementById('instlbl').textContent=conn?ex:'None';}
+  if(!nativeAvail())return;
+  try{
+    var sp=AwpNative.getScriptsPath();
+    var ap=AwpNative.getAutoexecPath();
+    var ex=AwpNative.getDetectedExecutor();
+    if(sp&&sp!==''){scriptsPath=sp;document.getElementById('scriptsPathLbl').textContent=sp;document.getElementById('accScripts').textContent=sp;}
+    if(ap&&ap!==''){autoexecPath=ap;document.getElementById('autoexecPathLbl').textContent=ap;document.getElementById('accAutoexec').textContent=ap;}
+    if(ex&&ex!=='Unknown'){document.getElementById('accExec').textContent=ex;}
+  }catch(e){}
 }
 
 function gid(){return 't'+(++tc);}
@@ -522,26 +529,19 @@ function switchTab(id){
 function closeTab(id,e){
   if(e){e.preventDefault();e.stopPropagation();}
   if(tabs.length===1){
-    var t=getT(id);
-    if(t){t.content='';t.name='Untitled Tab';}
-    if(ed)ed.setValue('');renderTabs();return;
+    var t=getT(id);if(t){t.content='';t.name='Untitled Tab';}
+    if(ed)ed.setValue('');renderTabs();persistTabs();return;
   }
   var idx=tabs.findIndex(function(t){return t.id===id;});
   tabs.splice(idx,1);
-  if(aid===id){
-    var nxt=tabs[Math.min(idx,tabs.length-1)];
-    aid=nxt.id;if(ed)ed.setValue(nxt.content);
-  }
-  renderTabs();
+  if(aid===id){var nxt=tabs[Math.min(idx,tabs.length-1)];aid=nxt.id;if(ed)ed.setValue(nxt.content);}
+  renderTabs();persistTabs();
 }
 
 function renderTabs(){
-  var bar=document.getElementById('TB');
-  bar.innerHTML='';
+  var bar=document.getElementById('TB');bar.innerHTML='';
   tabs.forEach(function(t){
-    var el=document.createElement('div');
-    el.className='tab'+(t.id===aid?' active':'');
-    el.setAttribute('data-id',t.id);
+    var el=document.createElement('div');el.className='tab'+(t.id===aid?' active':'');el.setAttribute('data-id',t.id);
     var ico=svgEl('0 0 24 24','M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
     var nm=document.createElement('span');nm.className='tname';nm.textContent=t.name;
     var x=document.createElement('span');x.className='tx';x.textContent='×';
@@ -552,18 +552,15 @@ function renderTabs(){
     x.addEventListener('click',function(e){closeTab(t.id,e);});
     bar.appendChild(el);
   });
-  var add=document.createElement('button');
-  add.className='tadd';add.title='New tab';add.textContent='+';
-  add.onclick=function(){newTab();};
-  bar.appendChild(add);
+  var add=document.createElement('button');add.className='tadd';add.title='New tab';add.textContent='+';
+  add.onclick=function(){newTab();};bar.appendChild(add);
 }
 
 function startRename(id,nmEl){
   var t=getT(id);if(!t)return;
-  var inp=document.createElement('input');
-  inp.className='trename';inp.value=t.name;
+  var inp=document.createElement('input');inp.className='trename';inp.value=t.name;
   nmEl.replaceWith(inp);inp.focus();inp.select();
-  function fin(){var v=inp.value.trim();if(v)t.name=v;renderTabs();}
+  function fin(){var v=inp.value.trim();if(v)t.name=v;renderTabs();persistTabs();}
   inp.addEventListener('blur',fin);
   inp.addEventListener('keydown',function(e){
     if(e.key==='Enter')inp.blur();
@@ -574,10 +571,8 @@ function startRename(id,nmEl){
 
 function svgEl(vb,d){
   var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  s.setAttribute('viewBox',vb);s.setAttribute('fill','none');
-  s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2');
-  var p=document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('d',d);s.appendChild(p);return s;
+  s.setAttribute('viewBox',vb);s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2');
+  var p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);s.appendChild(p);return s;
 }
 
 var CTX=document.getElementById('CTX');
@@ -591,14 +586,14 @@ function cxDo(a){
     if(el){var nm=el.querySelector('.tname');if(nm)startRename(cxId,nm);}
   }else if(a==='dup'){
     saveActive();var id=gid();tabs.push({id:id,name:t.name+' (copy)',content:t.content});
-    aid=id;if(ed)ed.setValue(t.content);renderTabs();
+    aid=id;if(ed)ed.setValue(t.content);renderTabs();persistTabs();
   }else if(a==='save'){
     saveActive();
     var name=t.name.endsWith('.lua')?t.name:t.name+'.lua';
     var ex=wfiles.findIndex(function(f){return f.name===name;});
     if(ex>=0)wfiles[ex].content=t.content;else wfiles.push({name:name,content:t.content});
-    renderWs();
-    if(typeof AwpNative!=='undefined')AwpNative.saveWorkspaceFile(name,t.content);
+    renderWs();persistWorkspace();
+    if(nativeAvail())AwpNative.saveWorkspaceFile(name,t.content);
     toast('Saved: '+name);
   }else if(a==='close'){closeTab(cxId,null);}
 }
@@ -606,37 +601,31 @@ function cxDo(a){
 function execScript(){
   if(!conn){log('err','No executor connected');return;}
   var s=ed?ed.getValue():'';if(!s.trim())return;
-  if(typeof AwpNative!=='undefined')AwpNative.executeScript(s);
+  if(nativeAvail())AwpNative.executeScript(s);
   log('sys','Sent '+s.split('\n').length+' lines');
 }
 
-function clearEd(){if(ed)ed.setValue('');saveActive();}
+function clearEd(){if(ed)ed.setValue('');saveActive();persistTabs();}
 
 function openFile(){
-  if(typeof AwpNative!=='undefined'){AwpNative.openFilePicker();return;}
+  if(nativeAvail()){AwpNative.openFilePicker();return;}
   var inp=document.createElement('input');inp.type='file';inp.accept='.lua,.luau,.txt';
   inp.onchange=function(e){
     var f=e.target.files[0];if(!f)return;
     var r=new FileReader();
-    r.onload=function(ev){saveActive();var id=gid();tabs.push({id:id,name:f.name,content:ev.target.result});aid=id;if(ed)ed.setValue(ev.target.result);renderTabs();};
+    r.onload=function(ev){saveActive();var id=gid();tabs.push({id:id,name:f.name,content:ev.target.result});aid=id;if(ed)ed.setValue(ev.target.result);renderTabs();persistTabs();};
     r.readAsText(f);
   };inp.click();
 }
 
-function openExec(){
-  if(!conn){log('err','No executor connected');return;}
-  if(typeof AwpNative!=='undefined')AwpNative.openFileAndExecute();
-}
-
-function doAttach(){log('sys',conn?'Already connected':'Open executor → inject → AWP connects automatically');}
-function doReattach(){if(typeof AwpNative!=='undefined')AwpNative.reattach();log('sys','Loadstring renewed and copied to clipboard');}
+function openExec(){if(!conn){log('err','No executor connected');return;}if(nativeAvail())AwpNative.openFileAndExecute();}
+function doAttach(){log('sys',conn?'Already connected':'Inject the loadstring in executor');}
+function doReattach(){if(nativeAvail())AwpNative.reattach();log('sys','Loadstring renewed and copied to clipboard');}
 
 function toggleLock(){
   locked=!locked;
-  if(typeof AwpNative!=='undefined')AwpNative.setLocked(locked);
-  var btn=document.getElementById('lockBtn');
-  btn.classList.toggle('locked',locked);
-  btn.title=locked?'Unlock window':'Lock window';
+  if(nativeAvail())AwpNative.setLocked(locked);
+  document.getElementById('lockBtn').classList.toggle('locked',locked);
   toast(locked?'Window locked':'Window unlocked');
 }
 
@@ -645,7 +634,7 @@ function renderWs(){
   if(!wsOpen){c.style.display='none';return;}
   c.style.display='';
   var q=document.getElementById('fsrch').value.toLowerCase();
-  var fil=wfiles.filter(function(f){return f.name.toLowerCase().includes(q);});
+  var fil=wfiles.filter(function(f){return f.name.toLowerCase().includes(q)&&!f.name.startsWith('__awp_');});
   if(!fil.length){c.innerHTML='<div class="wsempty">No scripts</div>';return;}
   c.innerHTML='';
   fil.forEach(function(f){
@@ -658,34 +647,26 @@ function renderWs(){
   });
 }
 
-function loadWsFile(name,content){
-  saveActive();var id=gid();tabs.push({id:id,name:name,content:content});
-  aid=id;if(ed)ed.setValue(content);renderTabs();ed&&ed.focus();
-}
-
+function loadWsFile(name,content){saveActive();var id=gid();tabs.push({id:id,name:name,content:content});aid=id;if(ed)ed.setValue(content);renderTabs();persistTabs();ed&&ed.focus();}
 function filterWs(){renderWs();}
-function toggleWs(){
-  wsOpen=!wsOpen;
-  document.getElementById('wsch').className='wsc'+(wsOpen?'':' cl');
-  renderWs();
-}
+function toggleWs(){wsOpen=!wsOpen;document.getElementById('wsch').className='wsc'+(wsOpen?'':' cl');renderWs();}
 
-function loadDiskScripts(){
-  if(typeof AwpNative==='undefined')return;
-  try{
-    var files=AwpNative.getWorkspaceFiles();
-    if(files){
-      var parsed=JSON.parse(files);
-      parsed.forEach(function(f){
-        var ex=wfiles.findIndex(function(x){return x.name===f.name;});
-        if(ex>=0)wfiles[ex]=f;else wfiles.push(f);
-      });
-      renderWs();
-    }
-  }catch(e){}
+function reloadWs(){
+  if(nativeAvail()){
+    try{
+      var files=AwpNative.getWorkspaceFiles();
+      if(files){
+        var parsed=JSON.parse(files);
+        parsed.forEach(function(f){
+          var ex=wfiles.findIndex(function(x){return x.name===f.name;});
+          if(ex>=0)wfiles[ex]=f;else wfiles.push(f);
+        });
+        renderWs();
+      }
+    }catch(e){}
+  }
+  toast('Scripts reloaded');
 }
-
-function reloadWs(){loadDiskScripts();toast('Scripts reloaded');}
 
 var typeMap={
   'print':{cls:'p',lbl:''},'warn':{cls:'w',lbl:'⚠ '},'error':{cls:'e',lbl:'✕ '},
@@ -698,16 +679,12 @@ function log(type,msg){
   var el=document.createElement('div');el.className='ol '+meta.cls;
   var pf=document.createElement('span');pf.className='ol-prefix';pf.textContent=meta.lbl;
   var ms=document.createElement('span');ms.className='ol-msg';ms.textContent=msg;
-  el.appendChild(pf);el.appendChild(ms);
-  b.appendChild(el);b.scrollTop=b.scrollHeight;
+  el.appendChild(pf);el.appendChild(ms);b.appendChild(el);b.scrollTop=b.scrollHeight;
   if(!outOpen){outOpen=true;document.getElementById('OP').className='op exp';}
 }
 
 function clearOut(e){e&&e.stopPropagation();document.getElementById('OB').innerHTML='';}
-function toggleOut(){
-  outOpen=!outOpen;
-  document.getElementById('OP').className='op '+(outOpen?'exp':'col');
-}
+function toggleOut(){outOpen=!outOpen;document.getElementById('OP').className='op '+(outOpen?'exp':'col');}
 
 function fetchUser(){
   var q=document.getElementById('accInp').value.trim();
@@ -715,72 +692,57 @@ function fetchUser(){
   document.getElementById('accLoad').style.display='block';
   document.getElementById('accErr').style.display='none';
   document.getElementById('accInfo').querySelectorAll('.acc-fetched').forEach(function(el){el.remove();});
-
   fetch('https://oficial.msdoors.xyz/api/v1/user-info?user='+encodeURIComponent(q))
     .then(function(r){return r.json();})
     .then(function(d){
       document.getElementById('accLoad').style.display='none';
       if(!d.success){throw new Error(d.error||'User not found');}
-      setAccountUI(d.displayName,d.username,d.userId,d.avatarUrl);
-      var rows=[
-        {lbl:'Username',val:'@'+d.username},
-        {lbl:'Display Name',val:d.displayName},
-        {lbl:'User ID',val:d.userId},
-      ];
-      var info=document.getElementById('accInfo');
-      rows.forEach(function(row){
-        var r=document.createElement('div');r.className='acc-row acc-fetched';
-        r.innerHTML='<span class="acc-lbl">'+row.lbl+'</span><span class="acc-val">'+row.val+'</span>';
-        info.appendChild(r);
-      });
+      applyAccountUI(d);
     })
     .catch(function(err){
       document.getElementById('accLoad').style.display='none';
-      var e=document.getElementById('accErr');
-      e.textContent=err.message||'Failed to fetch user';e.style.display='block';
+      var e=document.getElementById('accErr');e.textContent=err.message||'Failed';e.style.display='block';
     });
 }
 
-function setAccountUI(displayName,username,userId,avatarUrl){
-  document.getElementById('accName').textContent=displayName+' (@'+username+')';
-  document.getElementById('accSub').textContent='ID: '+userId;
+function applyAccountUI(d){
+  document.getElementById('accName').textContent=d.displayName+' (@'+d.username+')';
+  document.getElementById('accSub').textContent='ID: '+d.userId;
   document.getElementById('accSub').className='acc-sub';
-  var av=document.getElementById('accAv');
-  av.innerHTML='';
-  if(avatarUrl){
-    var img=document.createElement('img');
-    img.src=avatarUrl;
+  var av=document.getElementById('accAv');av.innerHTML='';
+  if(d.avatarUrl){
+    var img=document.createElement('img');img.src=d.avatarUrl;
     img.onerror=function(){av.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';};
     av.appendChild(img);
   }
-}
-
-function loadAccountFromMeta(meta){
-  if(!meta||!meta.userId||meta.userId===0)return;
-  fetch('https://oficial.msdoors.xyz/api/v1/user-info?user='+encodeURIComponent(meta.userId))
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(!d.success)return;
-      setAccountUI(d.displayName,d.username,d.userId,d.avatarUrl);
-    })
-    .catch(function(){});
+  var info=document.getElementById('accInfo');
+  info.querySelectorAll('.acc-fetched').forEach(function(el){el.remove();});
+  [{lbl:'Username',val:'@'+d.username},{lbl:'Display Name',val:d.displayName},{lbl:'User ID',val:String(d.userId)}].forEach(function(row){
+    var r=document.createElement('div');r.className='acc-row acc-fetched';
+    r.innerHTML='<span class="acc-lbl">'+row.lbl+'</span><span class="acc-val">'+row.val+'</span>';
+    info.appendChild(r);
+  });
 }
 
 window.addEventListener('awp:meta',function(e){
-  var d=e.detail;
-  if(!d)return;
-  var execName=d.executor||'Unknown';
-  document.getElementById('accExec').textContent=execName;
-  document.getElementById('instlbl').textContent=execName;
-  loadAccountFromMeta(d);
+  var d=e.detail;if(!d)return;
+  var ex=d.executor||'Unknown';
+  document.getElementById('accExec').textContent=ex;
+  document.getElementById('instlbl').textContent=ex;
+  if(d.userId&&d.userId!==0){
+    fetch('https://oficial.msdoors.xyz/api/v1/user-info?user='+d.userId)
+      .then(function(r){return r.json();})
+      .then(function(res){if(res.success)applyAccountUI(res);})
+      .catch(function(){});
+  }
 });
 
 function goView(v){
   ['s','g','a'].forEach(function(x){
     document.getElementById('V'+x.toUpperCase()).className='view'+(v===x?'':' hidden');
     document.getElementById('sb'+x).className='sbb'+(v===x?' active':'');
-    if(document.getElementById('d'+({s:'scr',g:'set',a:'acc'}[x])))
-      document.getElementById('d'+({s:'scr',g:'set',a:'acc'}[x])).className='ditem'+(v===x?' active':'');
+    var key={s:'scr',g:'set',a:'acc'}[x];
+    var el=document.getElementById('d'+key);if(el)el.className='ditem'+(v===x?' active':'');
   });
   var lbls={s:'Scripting',g:'Settings',a:'Account'};
   document.getElementById('tmlbl').textContent=lbls[v]||'Scripting';
@@ -795,7 +757,7 @@ document.addEventListener('click',function(e){
   if(!e.target.closest('#TM')){document.getElementById('TMD').classList.remove('show');document.getElementById('TMB').classList.remove('open');}
 });
 
-function showInst(){log(conn?'sys':'err',conn?'Instance connected':'No executor attached — inject the loadstring first');}
+function showInst(){log(conn?'sys':'err',conn?'Connected':'No executor attached');}
 
 function doResetState(){
   wfiles=[
@@ -805,81 +767,69 @@ function doResetState(){
     {name:'output-test.lua',content:'print("Hello from AWP!")'},
     {name:'Telekinesis.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/0zark/scripts/main/Telekinesis.lua"))()'},
   ];
-  renderWs();
-  if(typeof AwpNative!=='undefined')AwpNative.clearAppState();
-  toast('State reset');log('sys','State has been reset');
+  renderWs();persistWorkspace();
+  if(nativeAvail())AwpNative.clearAppState();
+  toast('State reset');log('sys','State reset');
 }
 
 function doSpoofHwid(){
   if(!conn){toast('Connect executor first');return;}
-  var fakeId=Math.random().toString(36).substr(2,8).toUpperCase()+'-'+
-             Math.random().toString(36).substr(2,8).toUpperCase()+'-'+
-             Date.now().toString(16).toUpperCase();
-  var script=
-    'local old\nold = hookmetamethod(game, "__namecall", function(self, ...)\n'+
-    '    if self == game:GetService("RbxAnalyticsService") and getnamecallmethod() == "GetClientId" then\n'+
-    '        return "'+fakeId+'"\n    end\n    return old(self, ...)\nend)\n'+
-    'print("[AWP] HWID spoofed -> '+fakeId+'")\n';
-  if(typeof AwpNative!=='undefined')AwpNative.executeScript(script);
-  log('ok','HWID spoof sent → '+fakeId);toast('HWID spoofed');
+  var fakeId=Math.random().toString(36).substr(2,8).toUpperCase()+'-'+Math.random().toString(36).substr(2,8).toUpperCase()+'-'+Date.now().toString(16).toUpperCase();
+  var script='local old\nold = hookmetamethod(game,"__namecall",function(self,...)\nif self==game:GetService("RbxAnalyticsService") and getnamecallmethod()=="GetClientId" then return "'+fakeId+'" end\nreturn old(self,...)\nend)\nprint("[AWP] HWID spoofed -> '+fakeId+'")\n';
+  if(nativeAvail())AwpNative.executeScript(script);
+  log('ok','HWID spoof → '+fakeId);toast('HWID spoofed');
 }
 
 function toggleAutoexec(){
   autoexecOn=!autoexecOn;
   document.getElementById('aeBtn').textContent=autoexecOn?'Disable':'Enable';
   document.getElementById('aeBtn').className='stb'+(autoexecOn?' on':'');
-  if(typeof AwpNative!=='undefined')AwpNative.setAutoexec(autoexecOn);
+  if(nativeAvail())AwpNative.setAutoexec(autoexecOn);
   toast('Autoexec '+(autoexecOn?'enabled':'disabled'));
 }
 
 function doTopmost(){
   topmostOn=!topmostOn;
-  document.getElementById('tmN').textContent='Toggle topmost: '+(topmostOn?'On':'Off');
+  document.getElementById('tmN').textContent='Topmost: '+(topmostOn?'On':'Off');
   document.getElementById('tmB').textContent=topmostOn?'Disable':'Enable';
   document.getElementById('tmB').className='stb'+(topmostOn?' on':'');
-  if(typeof AwpNative!=='undefined')AwpNative.setTopmost(topmostOn);
+  if(nativeAvail())AwpNative.setTopmost(topmostOn);
   toast('Topmost '+(topmostOn?'enabled':'disabled'));
 }
 
-function openFolder(path){
-  if(typeof AwpNative!=='undefined')AwpNative.openFolder(path);
-  else toast(path);
-}
-
-function doMin(){if(typeof AwpNative!=='undefined')AwpNative.minimize();}
-function doMax(){if(typeof AwpNative!=='undefined')AwpNative.maximize();}
-function doClose(){if(typeof AwpNative!=='undefined')AwpNative.closeApp();}
+function openFolder(path){if(nativeAvail())AwpNative.openFolder(path);else toast(path);}
+function doMin(){if(nativeAvail())AwpNative.minimize();}
+function doMax(){if(nativeAvail())AwpNative.maximize();}
+function doClose(){if(nativeAvail())AwpNative.closeApp();}
 
 window.addEventListener('awp:status',function(e){
   conn=e.detail==='connected';
   document.getElementById('sd').className='sdot'+(conn?' on':'');
   document.getElementById('execBtn').disabled=!conn;
   document.getElementById('execFBtn').disabled=!conn;
-  if(!conn){document.getElementById('instlbl').textContent='None';}
   document.getElementById('accConn').textContent=conn?'Connected':'Disconnected';
+  if(!conn)document.getElementById('instlbl').textContent='None';
   log(conn?'ok':'err',conn?'Executor connected':'Executor disconnected');
   if(conn&&autoexecOn)runAutoexec();
-  if(conn)loadDiskScripts();
+  if(conn)reloadWs();
 });
 
 window.addEventListener('awp:output',function(e){
   var d=e.detail;if(!d)return;
   var type,msg;
-  if(typeof d==='object'){type=d.type||'print';msg=d.msg||'';}
-  else{type='print';msg=String(d);}
+  if(typeof d==='object'){type=d.type||'print';msg=d.msg||'';}else{type='print';msg=String(d);}
   var mapped={print:'print',warn:'warn',error:'err',info:'i',ok:'ok',sys:'sys',err:'err'}[type]||'print';
   log(mapped,msg);
 });
 
 window.addEventListener('awp:file',function(e){
   var d=e.detail;if(!d)return;
-  saveActive();var id=gid();
-  tabs.push({id:id,name:d.name||'script.lua',content:d.content||''});
-  aid=id;if(ed)ed.setValue(d.content||'');renderTabs();
+  saveActive();var id=gid();tabs.push({id:id,name:d.name||'script.lua',content:d.content||''});
+  aid=id;if(ed)ed.setValue(d.content||'');renderTabs();persistTabs();
 });
 
 function runAutoexec(){
-  if(typeof AwpNative==='undefined')return;
+  if(!nativeAvail())return;
   try{
     var files=AwpNative.getAutoexecFiles();
     if(files){
@@ -887,7 +837,15 @@ function runAutoexec(){
       parsed.forEach(function(f){AwpNative.executeScript(f.content);log('sys','[Autoexec] '+f.name);});
       if(parsed.length)log('ok','Autoexec: ran '+parsed.length+' script(s)');
     }
-  }catch(e){log('err','Autoexec failed: '+e.message);}
+  }catch(e){log('err','Autoexec failed');}
+}
+
+var saveTabsTimer=null;
+if(ed){
+  ed.onDidChangeModelContent(function(){
+    clearTimeout(saveTabsTimer);
+    saveTabsTimer=setTimeout(function(){saveActive();persistTabs();},1500);
+  });
 }
 
 function toast(m){
