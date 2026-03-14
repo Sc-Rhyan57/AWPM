@@ -3,10 +3,15 @@ package gg.awp.executor.server
 import android.content.Context
 import android.util.Log
 import org.java_websocket.WebSocket
+import org.java_websocket.drafts.Draft_6455
+import org.java_websocket.extensions.IExtension
 import org.java_websocket.handshake.ClientHandshake
+import org.java_websocket.protocols.IProtocol
+import org.java_websocket.protocols.Protocol
 import org.java_websocket.server.WebSocketServer
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.util.Collections
 import java.util.Timer
 import java.util.TimerTask
 
@@ -15,7 +20,15 @@ class AwpWebSocketServer(
     private val onScriptOutput: (String) -> Unit,
     private val onClientConnected: () -> Unit,
     private val onClientDisconnected: () -> Unit
-) : WebSocketServer(InetSocketAddress("0.0.0.0", 9999)) {
+) : WebSocketServer(
+    InetSocketAddress("0.0.0.0", 9999),
+    Collections.singletonList(
+        Draft_6455(
+            emptyList<IExtension>(),
+            Collections.singletonList<IProtocol>(Protocol(""))
+        )
+    )
+) {
 
     private val tag = "AwpWsServer"
 
@@ -36,7 +49,7 @@ class AwpWebSocketServer(
     }
 
     override fun onClose(conn: WebSocket, code: Int, reason: String, remote: Boolean) {
-        Log.d(tag, "onClose code=$code reason='$reason' remote=$remote")
+        Log.d(tag, "onClose code=$code reason='$reason' remote=$remote addr=${conn.remoteSocketAddress}")
         if (activeClient === conn) {
             activeClient = null
             stopHeartbeat()
@@ -47,7 +60,10 @@ class AwpWebSocketServer(
     override fun onMessage(conn: WebSocket, message: String) {
         when {
             message == "pong" -> {}
-            message == "__ready" -> onScriptOutput("sys:Executor conectado")
+            message == "__ready" -> {
+                Log.d(tag, "executor ready")
+                onScriptOutput("sys:Executor conectado")
+            }
             message.startsWith("__console:") -> onScriptOutput(message.removePrefix("__console:"))
             message.startsWith("__error:") -> onScriptOutput("error:${message.removePrefix("__error:")}")
             message.startsWith("__meta:") -> onScriptOutput(message)
@@ -58,7 +74,7 @@ class AwpWebSocketServer(
     override fun onMessage(conn: WebSocket, message: ByteBuffer) {}
 
     override fun onError(conn: WebSocket?, ex: Exception) {
-        Log.e(tag, "onError: ${ex.message}")
+        Log.e(tag, "onError addr=${conn?.remoteSocketAddress}: ${ex.message}")
     }
 
     override fun onStart() {
@@ -88,7 +104,7 @@ class AwpWebSocketServer(
                         stopHeartbeat()
                     }
                 }
-            }, 8_000L, 8_000L)
+            }, 15_000L, 15_000L)
         }
     }
 
