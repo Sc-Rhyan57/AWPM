@@ -1,4 +1,5 @@
 if _G.__AWP_WS_ACTIVE then
+    print("[AWP] Already active, skipping")
     return
 end
 _G.__AWP_WS_ACTIVE = true
@@ -6,192 +7,97 @@ _G.__AWP_WS_ACTIVE = true
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
+local serverIp = "REPLACE_WITH_LOCAL_IP"
 local ws = nil
 local connected = false
-local connecting = false
-local reconnectAttempts = 0
-local maxReconnectDelay = 30
-local serverIp = "REPLACE_WITH_LOCAL_IP"
+
+print("[AWP] Starting AWP client...")
+print("[AWP] Server IP: " .. serverIp)
 
 local execName = "Unknown"
 pcall(function()
     execName = (identifyexecutor and identifyexecutor()) or
                (getexecutorname and getexecutorname()) or "Unknown"
+    print("[AWP] Executor: " .. execName)
 end)
 
-local userId, displayName, username = 0, "", ""
+local userId = 0
 pcall(function()
-    local lp = Players.LocalPlayer
-    userId = lp.UserId
-    displayName = lp.DisplayName
-    username = lp.Name
+    userId = Players.LocalPlayer.UserId
+    print("[AWP] User ID: " .. userId)
 end)
 
-local metaPayload = HttpService:JSONEncode({
-    executor    = execName,
-    userId      = userId,
-    displayName = displayName,
-    username    = username
-})
-
-pcall(function()
-    local hgui = gethui()
-    local function destroyExec(inst)
-        for _, c in ipairs(inst:GetChildren()) do
-            if c.Name == "Executor" then
-                pcall(function()
-                    if c.Parent == hgui then c:Destroy() else c.Parent:Destroy() end
-                end)
-                return
-            end
-            destroyExec(c)
-        end
+local function connectToServer()
+    if connected then 
+        print("[AWP] Already connected")
+        return 
     end
-    destroyExec(hgui)
-    for _, v in ipairs(hgui:GetChildren()) do
-        local n = v.Name:lower()
-        if n:find("delta") or n:find("executor") or n:find("exploit") or n:find("injector") then
-            pcall(function() v:Destroy() end)
-        end
-    end
-end)
-
-local rawPrint = print
-local rawWarn  = warn
-local rawError = error
-
-local function send(msg)
-    if ws and connected then
-        local ok = pcall(function() ws:Send(msg) end)
-        if not ok then
-            connected = false
-            ws = nil
-        end
-    end
-end
-
-print = function(...)
-    local parts = {}
-    for i = 1, select('#', ...) do parts[i] = tostring(select(i, ...)) end
-    pcall(rawPrint, ...)
-    send("__console:print:" .. table.concat(parts, "\t"))
-end
-
-warn = function(...)
-    local parts = {}
-    for i = 1, select('#', ...) do parts[i] = tostring(select(i, ...)) end
-    pcall(rawWarn, ...)
-    send("__console:warn:" .. table.concat(parts, "\t"))
-end
-
-error = function(msg, level)
-    send("__console:error:" .. tostring(msg))
-    pcall(rawError, msg, level or 1)
-end
-
-pcall(function()
-    local ls = game:GetService("LogService")
-    local types = {
-        [Enum.MessageType.MessageOutput]  = "print",
-        [Enum.MessageType.MessageInfo]    = "info",
-        [Enum.MessageType.MessageWarning] = "warn",
-        [Enum.MessageType.MessageError]   = "error",
-    }
-    ls.MessageOut:Connect(function(message, msgType)
-        send("__console:" .. (types[msgType] or "print") .. ":" .. tostring(message))
-    end)
-end)
-
-local function cleanup()
-    if ws then
-        pcall(function() ws:Close() end)
-        ws = nil
-    end
+    
     connected = false
-    connecting = false
-end
-
-local function connect()
-    if connecting or connected then return end
-    connecting = true
-    
-    cleanup()
-    
-    task.wait(1.0)
-
     local wsUrl = "ws://" .. serverIp .. ":9999"
+    
+    print("[AWP] Connecting to " .. wsUrl)
+    
     local ok, err = pcall(function()
         ws = WebSocket.connect(wsUrl)
     end)
-
-    if not ok or not ws then
-        rawPrint("[AWP] Failed to connect: " .. tostring(err))
-        connecting = false
-        connected = false
-        ws = nil
-        reconnectAttempts = reconnectAttempts + 1
+    
+    if not ok then
+        print("[AWP] Connect failed: " .. tostring(err))
         return
     end
-
-    local closeHandled = false
-    local openConfirmed = false
-
+    
+    if not ws then
+        print("[AWP] WebSocket is nil")
+        return
+    end
+    
+    print("[AWP] WebSocket object created")
+    
     ws.OnClose:Connect(function()
-        if closeHandled then return end
-        closeHandled = true
-        rawPrint("[AWP] Connection closed")
+        print("[AWP] Connection closed by server")
         connected = false
-        connecting = false
         ws = nil
-        reconnectAttempts = reconnectAttempts + 1
     end)
-
+    
     ws.OnMessage:Connect(function(msg)
-        if not openConfirmed then
-            openConfirmed = true
-            rawPrint("[AWP] First message received, connection stable")
-        end
+        print("[AWP] Received: " .. tostring(msg):sub(1, 50))
         
-        if msg == "ping" then
-            send("pong")
+        if msg == "__ping" or msg == "ping" then
+            pcall(function() ws:Send("__pong") end)
+            if not connected then
+                connected = true
+                print("[AWP] Connection established!")
+                task.wait(0.1)
+                pcall(function() ws:Send("__ready") end)
+                task.wait(0.1)
+                pcall(function() 
+                    ws:Send("__meta:" .. HttpService:JSONEncode({
+                        executor = execName,
+                        userId = userId
+                    }))
+                end)
+            end
             return
         end
-        local fn, loadErr = loadstring(msg)
-        if fn then
-            local ok2, execErr = pcall(fn)
-            if not ok2 then send("__error:" .. tostring(execErr)) end
-        else
-            send("__error:syntax:" .. tostring(loadErr))
-        end
-    end)
-
-    task.wait(2.0)
-
-    if ws and not closeHandled then
-        connected = true
-        connecting = false
-        reconnectAttempts = 0
-        rawPrint("[AWP] Connected to " .. wsUrl)
-
-        send("__ready")
-        task.wait(0.3)
-        send("__meta:" .. metaPayload)
-    else
-        rawPrint("[AWP] Connection failed during handshake")
-        cleanup()
-    end
-end
-
-task.spawn(function()
-    while _G.__AWP_WS_ACTIVE do
-        if not connected and not connecting then
-            local delay = math.min(3 + (reconnectAttempts * 2), maxReconnectDelay)
-            rawPrint("[AWP] Attempting connection (attempt " .. (reconnectAttempts + 1) .. ")")
-            connect()
-            if not connected then
-                task.wait(delay)
+        
+        if msg:sub(1, 1) ~= "_" then
+            local fn, loadErr = loadstring(msg)
+            if fn then
+                task.spawn(function()
+                    local ok, execErr = pcall(fn)
+                    if not ok then 
+                        print("[AWP] Exec error: " .. tostring(execErr))
+                    end
+                end)
+            else
+                print("[AWP] Syntax error: " .. tostring(loadErr))
             end
         end
-        task.wait(3)
-    end
-end)
+    end)
+    
+    print("[AWP] Waiting for server ping...")
+end
+
+task.wait(1)
+connectToServer()
