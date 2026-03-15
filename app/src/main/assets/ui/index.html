@@ -20,8 +20,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .tbl{display:flex;align-items:center;gap:8px}
 .brand{font-weight:700;font-size:14px;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;gap:5px}
 .brand b{color:var(--t3);font-weight:400}
-.brand-img{height:18px;width:auto;pointer-events:none;-webkit-user-drag:none;display:none}
-.brand-txt{display:inline}
+.brand-img{height:18px;width:auto;pointer-events:none;-webkit-user-drag:none}
+.brand-txt{display:none}
 .sep{color:var(--b2)}
 .tmenu{position:relative}
 .tmbtn{display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--t2);font-size:12px;padding:3px 7px;border-radius:4px;cursor:pointer;transition:all .12s}
@@ -29,7 +29,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .tmbtn svg{width:13px;height:13px}
 .arr{transition:transform .15s}
 .tmbtn.open .arr{transform:rotate(180deg)}
-.drop{position:absolute;top:calc(100%+4px);left:0;background:var(--bg2);border:1px solid var(--b2);border-radius:6px;min-width:130px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;overflow:hidden}
+.drop{position:absolute;top:calc(100%+4px);left:0;background:var(--bg2);border:1px solid var(--b2);border-radius:6px;min-width:130px;z-index:400;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;overflow:hidden}
 .drop.show{display:block}
 .ditem{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:12px;color:var(--t2);transition:all .1s}
 .ditem:hover{background:var(--bg3);color:var(--t1)}
@@ -160,8 +160,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .acc-loading{padding:20px 16px;text-align:center;color:var(--t3);font-size:12px}
 .acc-err{padding:10px 16px;color:var(--red);font-size:11.5px}
 
-/* LOGS PANEL */
-.logs-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:5000;display:flex;flex-direction:column;backdrop-filter:blur(4px)}
+/* LOGS PANEL - highest z-index layer */
+.logs-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99990;display:flex;flex-direction:column;backdrop-filter:blur(4px)}
 .logs-overlay.hidden{display:none}
 .logs-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
 .logs-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
@@ -183,14 +183,74 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .log-line-d{color:var(--t3)}
 .log-line-i{color:var(--blue)}
 
-.ctx{position:fixed;background:var(--bg2);border:1px solid var(--b2);border-radius:6px;z-index:1000;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;overflow:hidden}
+/* CONTEXT MENU */
+.ctx{position:fixed;background:var(--bg2);border:1px solid var(--b2);border-radius:6px;z-index:99980;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;overflow:hidden}
 .ctx.show{display:block}
 .cxi{padding:7px 12px;font-size:12px;color:var(--t2);cursor:pointer;transition:all .1s}
 .cxi:hover{background:var(--bg3);color:var(--t1)}
 .cxi.danger{color:var(--red)}
 .cxi.danger:hover{background:#2a1010}
-.toast{position:fixed;bottom:55px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--b2);border-radius:6px;padding:7px 14px;font-size:11.5px;color:var(--t1);z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
-.toast.show{opacity:1}
+
+/* TOAST - always on top of everything */
+.toast{
+  position:fixed;
+  bottom:60px;
+  left:50%;
+  transform:translateX(-50%) translateY(0);
+  background:var(--bg3);
+  border:1px solid var(--b3);
+  border-radius:8px;
+  padding:8px 16px;
+  font-size:12px;
+  color:var(--t1);
+  z-index:99999;
+  opacity:0;
+  pointer-events:none;
+  white-space:nowrap;
+  max-width:90vw;
+  text-align:center;
+  transition:opacity .2s ease, transform .2s ease;
+  box-shadow:0 4px 16px rgba(0,0,0,.6);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+/* NOTIFY STACK - connection notifications always on top */
+.notify-stack{
+  position:fixed;
+  top:48px;
+  right:10px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  z-index:99998;
+  pointer-events:none;
+}
+.notify{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:7px;
+  font-size:11.5px;
+  font-weight:500;
+  background:var(--bg2);
+  border:1px solid var(--b2);
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
+  opacity:0;
+  transform:translateX(16px);
+  transition:opacity .25s ease, transform .25s ease;
+  pointer-events:none;
+  max-width:220px;
+}
+.notify.show{opacity:1;transform:translateX(0)}
+.notify.ok{border-color:#2d5a2d;background:#0d1f0d}
+.notify.ok .ndot{background:var(--green)}
+.notify.err{border-color:#5a2020;background:#1f0d0d}
+.notify.err .ndot{background:var(--red)}
+.notify.info{border-color:#1a3a5a;background:#0d1525}
+.notify.info .ndot{background:var(--blue)}
+.ndot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
 #ld{position:fixed;inset:0;background:var(--bg0);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:10px}
 #ld.gone{display:none}
 .sp{width:22px;height:22px;border:2px solid var(--b2);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite}
@@ -201,6 +261,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 <body>
 <div id="ld"><div class="sp"></div><div class="lt">Loading Monaco...</div></div>
 
+<!-- Notification stack - always on top -->
+<div class="notify-stack" id="NSTACK"></div>
+
+<!-- Logs overlay -->
 <div class="logs-overlay hidden" id="LOGS">
   <div class="logs-header">
     <div class="logs-title">
@@ -220,7 +284,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
   <div class="tbar">
     <div class="tbl">
       <span class="brand" id="brandEl" onclick="brandClick()">
-        <img class="brand-img" id="brandImg" src="awp.png" alt="AWP" draggable="false">
+        <img class="brand-img" id="brandImg" src="awp.png" alt="AWP" draggable="false"
+          onerror="this.style.display='none';document.getElementById('brandTxt').style.display='inline'">
         <span class="brand-txt" id="brandTxt">AWP<b>.</b>GG</span>
       </span>
       <span style="color:var(--t3);font-size:16px;letter-spacing:3px;margin:0 4px;opacity:.4">⠿</span>
@@ -280,10 +345,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Exec File</span>
               </button>
               <div class="csp"></div>
-              <button class="ib" onclick="doAttach()" title="Attach">
+              <button class="ib" onclick="doAttach()" title="Copy loadstring">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               </button>
-              <button class="ib" onclick="doReattach()" title="Re-attach">
+              <button class="ib" onclick="doReattach()" title="Re-attach / copy loadstring again">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
               </button>
             </div>
@@ -313,10 +378,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
           <div class="ob" id="OB"></div>
         </div>
         <div class="ibar">
-          <button class="instb" onclick="showInst()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span id="instlbl">None</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:9px;height:9px"><polyline points="6 9 12 15 18 9"/></svg>
+          <button class="instb" onclick="copyLoadstring()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="instlbl">Copy Loadstring</span>
           </button>
         </div>
       </div>
@@ -324,6 +388,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
       <div class="view hidden" id="VG">
         <div class="stw">
           <div class="stt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>General</div>
+          <div class="sti"><div class="stin"><div class="stn">Copy Loadstring</div><div class="std">Copia o loadstring para o clipboard.</div></div><button class="stb" onclick="copyLoadstring()">Copy</button></div>
           <div class="sti"><div class="stin"><div class="stn">Reset State</div><div class="std">Clears all local AWP data.</div></div><button class="stb" onclick="doResetState()">Reset</button></div>
           <div class="sti"><div class="stin"><div class="stn">Spoof HWID</div><div class="std">Hooks RbxAnalyticsService to return a fake HWID.</div></div><button class="stb red" onclick="doSpoofHwid()">Spoof</button></div>
           <div class="sti"><div class="stin"><div class="stn">Autoexec</div><div class="std">Run scripts in autoexec folder on attach.</div></div><button class="stb" id="aeBtn" onclick="toggleAutoexec()">Enable</button></div>
@@ -381,13 +446,6 @@ var brandClickCount=0,brandClickTimer=null;
 
 function nativeAvail(){return typeof AwpNative!=='undefined';}
 
-(function(){
-  var img=document.getElementById('brandImg');
-  var txt=document.getElementById('brandTxt');
-  img.onload=function(){img.style.display='inline-block';txt.style.display='none';};
-  img.onerror=function(){img.style.display='none';txt.style.display='inline';};
-})();
-
 function brandClick(){
   brandClickCount++;
   clearTimeout(brandClickTimer);
@@ -403,10 +461,7 @@ function openLogs(){
   document.getElementById('LOGS').classList.remove('hidden');
   refreshLogs();
 }
-
-function closeLogs(){
-  document.getElementById('LOGS').classList.add('hidden');
-}
+function closeLogs(){document.getElementById('LOGS').classList.add('hidden');}
 
 function refreshLogs(){
   var body=document.getElementById('LOGSBODY');
@@ -417,16 +472,13 @@ function refreshLogs(){
       var raw=AwpNative.getLogs();
       if(!raw){body.textContent='Sem logs disponíveis';return;}
       body.innerHTML='';
-      var lines=raw.split('\n');
-      lines.forEach(function(line){
-        var span=document.createElement('div');
+      raw.split('\n').forEach(function(line){
+        var d=document.createElement('div');
         var cls='log-line-d';
         if(line.indexOf(' E ')>-1||line.indexOf('/E ')>-1)cls='log-line-e';
         else if(line.indexOf(' W ')>-1||line.indexOf('/W ')>-1)cls='log-line-w';
         else if(line.indexOf(' I ')>-1||line.indexOf('/I ')>-1)cls='log-line-i';
-        span.className=cls;
-        span.textContent=line;
-        body.appendChild(span);
+        d.className=cls;d.textContent=line;body.appendChild(d);
       });
       body.scrollTop=body.scrollHeight;
     }catch(e){body.textContent='Erro: '+e.message;}
@@ -441,7 +493,26 @@ function saveLogsToWorkspace(){
     var name='awp_logs_'+Date.now()+'.txt';
     AwpNative.saveWorkspaceFile(name,raw);
     toast('Logs salvos: '+name);
-  }catch(e){toast('Erro ao salvar: '+e.message);}
+  }catch(e){toast('Erro: '+e.message);}
+}
+
+/* ---- NOTIFY SYSTEM ---- */
+var notifyTimers={};
+var notifyCounter=0;
+function notify(msg,type){
+  type=type||'info';
+  var id='n'+(++notifyCounter);
+  var stack=document.getElementById('NSTACK');
+  var el=document.createElement('div');
+  el.className='notify '+type;
+  el.id=id;
+  el.innerHTML='<span class="ndot"></span><span>'+msg+'</span>';
+  stack.appendChild(el);
+  requestAnimationFrame(function(){el.classList.add('show');});
+  notifyTimers[id]=setTimeout(function(){
+    el.classList.remove('show');
+    setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},300);
+  },3000);
 }
 
 var wfiles=[];
@@ -528,7 +599,6 @@ function persistWorkspace(){
   if(!nativeAvail())return;
   try{AwpNative.saveWorkspaceFile('__awp_wfiles.json',JSON.stringify(wfiles));}catch(e){}
 }
-
 function persistTabs(){
   if(!nativeAvail())return;
   try{
@@ -536,7 +606,6 @@ function persistTabs(){
     AwpNative.saveWorkspaceFile('__awp_tabs.json',JSON.stringify({tabs:data,aid:aid}));
   }catch(e){}
 }
-
 function loadPersistedState(){
   var loadedWf=false,loadedTabs=false;
   if(nativeAvail()){
@@ -576,7 +645,6 @@ function loadPersistedState(){
   if(!loadedTabs)newTab('-- Welcome to AWP!');
   renderWs();
 }
-
 function initPaths(){
   if(!nativeAvail())return;
   try{
@@ -585,25 +653,21 @@ function initPaths(){
     var ex=AwpNative.getDetectedExecutor();
     if(sp&&sp!==''){scriptsPath=sp;document.getElementById('scriptsPathLbl').textContent=sp;document.getElementById('accScripts').textContent=sp;}
     if(ap&&ap!==''){autoexecPath=ap;document.getElementById('autoexecPathLbl').textContent=ap;document.getElementById('accAutoexec').textContent=ap;}
-    if(ex&&ex!=='Unknown'){document.getElementById('accExec').textContent=ex;}
+    if(ex&&ex!=='Unknown'){document.getElementById('accExec').textContent=ex;document.getElementById('instlbl').textContent=ex;}
   }catch(e){}
 }
 
 function gid(){return 't'+(++tc);}
 function getT(id){return tabs.find(function(t){return t.id===id;});}
 function saveActive(){var t=getT(aid);if(t&&ed)t.content=ed.getValue();}
-
 function newTab(content){
   var id=gid();tabs.push({id:id,name:'Untitled Tab',content:content||''});
-  if(aid)saveActive();
-  aid=id;renderTabs();if(ed)ed.setValue(content||'');ed&&ed.focus();
+  if(aid)saveActive();aid=id;renderTabs();if(ed)ed.setValue(content||'');ed&&ed.focus();
 }
-
 function switchTab(id){
   if(id===aid)return;saveActive();aid=id;
   var t=getT(id);if(t&&ed)ed.setValue(t.content);renderTabs();ed&&ed.focus();
 }
-
 function closeTab(id,e){
   if(e){e.preventDefault();e.stopPropagation();}
   if(tabs.length===1){var t=getT(id);if(t){t.content='';t.name='Untitled Tab';}if(ed)ed.setValue('');renderTabs();persistTabs();return;}
@@ -611,7 +675,6 @@ function closeTab(id,e){
   if(aid===id){var nxt=tabs[Math.min(idx,tabs.length-1)];aid=nxt.id;if(ed)ed.setValue(nxt.content);}
   renderTabs();persistTabs();
 }
-
 function renderTabs(){
   var bar=document.getElementById('TB');bar.innerHTML='';
   tabs.forEach(function(t){
@@ -629,7 +692,6 @@ function renderTabs(){
   var add=document.createElement('button');add.className='tadd';add.title='New tab';add.textContent='+';
   add.onclick=function(){newTab();};bar.appendChild(add);
 }
-
 function startRename(id,nmEl){
   var t=getT(id);if(!t)return;
   var inp=document.createElement('input');inp.className='trename';inp.value=t.name;
@@ -638,17 +700,14 @@ function startRename(id,nmEl){
   inp.addEventListener('blur',fin);
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=t.name;inp.blur();}e.stopPropagation();});
 }
-
 function svgEl(vb,d){
   var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
   s.setAttribute('viewBox',vb);s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2');
   var p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);s.appendChild(p);return s;
 }
-
 var CTX=document.getElementById('CTX');
 function showCtx(e,id){e.preventDefault();e.stopPropagation();cxId=id;CTX.style.left=Math.min(e.clientX,window.innerWidth-145)+'px';CTX.style.top=Math.min(e.clientY,window.innerHeight-130)+'px';CTX.classList.add('show');}
 document.addEventListener('click',function(){CTX.classList.remove('show');});
-
 function cxDo(a){
   CTX.classList.remove('show');var t=getT(cxId);if(!t)return;
   if(a==='rename'){var el=document.querySelector('[data-id="'+cxId+'"]');if(el){var nm=el.querySelector('.tname');if(nm)startRename(cxId,nm);}}
@@ -661,16 +720,30 @@ function cxDo(a){
   }else if(a==='close'){closeTab(cxId,null);}
 }
 
-function execScript(){if(!conn){log('err','No executor connected');return;}var s=ed?ed.getValue():'';if(!s.trim())return;if(nativeAvail())AwpNative.executeScript(s);log('sys','Sent '+s.split('\n').length+' lines');}
+function execScript(){
+  if(!conn){notify('No executor connected','err');log('err','No executor connected');return;}
+  var s=ed?ed.getValue():'';
+  if(!s.trim()){toast('Editor is empty');return;}
+  if(nativeAvail())AwpNative.executeScript(s);
+  log('sys','Sent '+s.split('\n').length+' lines');
+  notify('Script sent!','ok');
+}
 function clearEd(){if(ed)ed.setValue('');saveActive();persistTabs();}
 function openFile(){
   if(nativeAvail()){AwpNative.openFilePicker();return;}
   var inp=document.createElement('input');inp.type='file';inp.accept='.lua,.luau,.txt';
   inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){saveActive();var id=gid();tabs.push({id:id,name:f.name,content:ev.target.result});aid=id;if(ed)ed.setValue(ev.target.result);renderTabs();persistTabs();};r.readAsText(f);};inp.click();
 }
-function openExec(){if(!conn){log('err','No executor connected');return;}if(nativeAvail())AwpNative.openFileAndExecute();}
-function doAttach(){log('sys',conn?'Already connected':'Inject the loadstring in executor');}
-function doReattach(){if(nativeAvail())AwpNative.reattach();log('sys','Loadstring renewed and copied to clipboard');}
+function openExec(){if(!conn){notify('No executor connected','err');return;}if(nativeAvail())AwpNative.openFileAndExecute();}
+function copyLoadstring(){
+  if(nativeAvail()){
+    try{var ls=AwpNative.getLoadstring();if(ls){AwpNative.reattach();notify('Loadstring copied!','ok');log('sys','Loadstring copiado: '+ls);return;}}catch(e){}
+  }
+  notify('Paste the loadstring in your executor to connect','info');
+  log('sys','Inject the loadstring in executor');
+}
+function doAttach(){copyLoadstring();}
+function doReattach(){if(nativeAvail())AwpNative.reattach();notify('Loadstring renewed & copied','ok');log('sys','Loadstring renewed and copied to clipboard');}
 function toggleLock(){locked=!locked;if(nativeAvail())AwpNative.setLocked(locked);document.getElementById('lockBtn').classList.toggle('locked',locked);toast(locked?'Window locked':'Window unlocked');}
 
 function renderWs(){
@@ -720,11 +793,9 @@ function fetchUser(){
     .then(function(d){document.getElementById('accLoad').style.display='none';if(!d.success)throw new Error(d.error||'Not found');applyAccountUI(d);})
     .catch(function(err){document.getElementById('accLoad').style.display='none';var e=document.getElementById('accErr');e.textContent=err.message;e.style.display='block';});
 }
-
 function applyAccountUI(d){
   document.getElementById('accName').textContent=d.displayName+' (@'+d.username+')';
   document.getElementById('accSub').textContent='ID: '+d.userId;
-  document.getElementById('accSub').className='acc-sub';
   var av=document.getElementById('accAv');av.innerHTML='';
   if(d.avatarUrl){var img=document.createElement('img');img.src=d.avatarUrl;img.onerror=function(){av.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';};av.appendChild(img);}
   var info=document.getElementById('accInfo');info.querySelectorAll('.acc-fetched').forEach(function(el){el.remove();});
@@ -758,7 +829,6 @@ function goView(v){
 }
 function tmToggle(){var btn=document.getElementById('TMB'),dd=document.getElementById('TMD');var o=dd.classList.toggle('show');btn.classList.toggle('open',o);}
 document.addEventListener('click',function(e){if(!e.target.closest('#TM')){document.getElementById('TMD').classList.remove('show');document.getElementById('TMB').classList.remove('open');}});
-function showInst(){log(conn?'sys':'err',conn?'Connected':'No executor attached');}
 
 function doResetState(){
   wfiles=[
@@ -771,13 +841,13 @@ function doResetState(){
   renderWs();persistWorkspace();if(nativeAvail())AwpNative.clearAppState();toast('State reset');log('sys','State reset');
 }
 function doSpoofHwid(){
-  if(!conn){toast('Connect executor first');return;}
+  if(!conn){notify('Connect executor first','err');return;}
   var fakeId=Math.random().toString(36).substr(2,8).toUpperCase()+'-'+Math.random().toString(36).substr(2,8).toUpperCase()+'-'+Date.now().toString(16).toUpperCase();
   var script='local old\nold=hookmetamethod(game,"__namecall",function(self,...)\nif self==game:GetService("RbxAnalyticsService") and getnamecallmethod()=="GetClientId" then return "'+fakeId+'" end\nreturn old(self,...)\nend)\nprint("[AWP] HWID spoofed -> '+fakeId+'")\n';
-  if(nativeAvail())AwpNative.executeScript(script);log('ok','HWID → '+fakeId);toast('HWID spoofed');
+  if(nativeAvail())AwpNative.executeScript(script);log('ok','HWID → '+fakeId);notify('HWID spoofed','ok');
 }
 function toggleAutoexec(){autoexecOn=!autoexecOn;document.getElementById('aeBtn').textContent=autoexecOn?'Disable':'Enable';document.getElementById('aeBtn').className='stb'+(autoexecOn?' on':'');if(nativeAvail())AwpNative.setAutoexec(autoexecOn);toast('Autoexec '+(autoexecOn?'enabled':'disabled'));}
-function doTopmost(){topmostOn=!topmostOn;document.getElementById('tmN').textContent='Topmost: '+(topmostOn?'On':'Off');document.getElementById('tmB').textContent=topmostOn?'Disable':'Enable';document.getElementById('tmB').className='stb'+(topmostOn?' on':'');if(nativeAvail())AwpNative.setTopmost(topmostOn);toast('Topmost '+(topmostOn?'enabled':'disabled'));}
+function doTopmost(){topmostOn=!topmostOn;document.getElementById('tmN').textContent='Topmost: '+(topmostOn?'On':'Off');document.getElementById('tmB').textContent=topmastOn?'Disable':'Enable';document.getElementById('tmB').className='stb'+(topmostOn?' on':'');if(nativeAvail())AwpNative.setTopmost(topmostOn);toast('Topmost '+(topmostOn?'enabled':'disabled'));}
 function openFolder(path){if(nativeAvail())AwpNative.openFolder(path);else toast(path);}
 function doMin(){if(nativeAvail())AwpNative.minimize();}
 function doMax(){if(nativeAvail())AwpNative.maximize();}
@@ -789,8 +859,9 @@ window.addEventListener('awp:status',function(e){
   document.getElementById('execBtn').disabled=!conn;
   document.getElementById('execFBtn').disabled=!conn;
   document.getElementById('accConn').textContent=conn?'Connected':'Disconnected';
-  if(!conn)document.getElementById('instlbl').textContent='None';
   log(conn?'ok':'err',conn?'Executor connected':'Executor disconnected');
+  notify(conn?'Executor connected':'Executor disconnected', conn?'ok':'err');
+  if(!conn)document.getElementById('instlbl').textContent='Copy Loadstring';
   if(conn&&autoexecOn)runAutoexec();
   if(conn)reloadWs();
 });
@@ -806,7 +877,10 @@ function runAutoexec(){
   if(!nativeAvail())return;
   try{var files=AwpNative.getAutoexecFiles();if(files){var p=JSON.parse(files);p.forEach(function(f){AwpNative.executeScript(f.content);log('sys','[Autoexec] '+f.name);});if(p.length)log('ok','Autoexec: ran '+p.length+' script(s)');}}catch(e){log('err','Autoexec failed');}
 }
-function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(ttimer);ttimer=setTimeout(function(){t.classList.remove('show');},2200);}
+function toast(m){
+  var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(ttimer);ttimer=setTimeout(function(){t.classList.remove('show');},2200);
+}
 document.addEventListener('contextmenu',function(e){if(!e.target.closest('.tab'))e.preventDefault();});
 </script>
 </body>
