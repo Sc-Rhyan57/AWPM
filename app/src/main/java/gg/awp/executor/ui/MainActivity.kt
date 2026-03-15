@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         if (hasOverlayPermission()) {
             checkStoragePermissionThenStart()
         } else {
-            Toast.makeText(this, "Permissão de overlay negada — AWP não pode flutuar sem ela", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Overlay permission denied — AWP cannot float without it.", Toast.LENGTH_LONG).show()
             finish()
         }
     }
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         if (hasOverlayPermission()) {
             checkStoragePermissionThenStart()
         } else {
-            Toast.makeText(this, "AWP precisa da permissão de overlay para flutuar sobre apps", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "AWP needs overlay permission to float over apps.", Toast.LENGTH_LONG).show()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 overlayPermLauncher.launch(
                     Intent(
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         if (hasStoragePermission()) {
             startOverlay()
         } else {
-            Toast.makeText(this, "AWP precisa de acesso total ao armazenamento para ler scripts do Seu Executor", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "AWP needs full access to storage to read scripts from your Executor.", Toast.LENGTH_LONG).show()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 try {
                     storagePermLauncher.launch(
