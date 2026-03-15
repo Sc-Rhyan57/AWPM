@@ -495,13 +495,13 @@ class OverlayService : Service() {
         )
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             Notification.Builder(this, NOTIF_CHANNEL)
-                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
+                .setContentTitle("AWP.GG: By Rhyan57").setContentText("Tap to show")
                 .setSmallIcon(android.R.drawable.ic_menu_view)
                 .setContentIntent(showIntent).setOngoing(true).build()
         else {
             @Suppress("DEPRECATION")
             Notification.Builder(this)
-                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
+                .setContentTitle("AWP.GG: By Rhyan57").setContentText("Tap to show")
                 .setSmallIcon(android.R.drawable.ic_menu_view).setOngoing(true).build()
         }
     }
