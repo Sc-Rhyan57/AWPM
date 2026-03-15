@@ -21,7 +21,7 @@ class OverlayModel(private val app: Application) {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val mainHandler = Handler(Looper.getMainLooper())
     private var disconnectRunnable: Runnable? = null
-    private val DISCONNECT_DEBOUNCE_MS = 5_000L
+    private val DISCONNECT_DEBOUNCE_MS = 10_000L
 
     fun start() {
         scope.launch {
