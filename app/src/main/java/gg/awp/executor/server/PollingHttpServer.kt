@@ -96,14 +96,14 @@ class PollingHttpServer(
 
     private fun serveInitScript(): Response {
         return try {
-            val script = context.assets.open("init_polling.lua")
+            val script = context.assets.open("init.lua")
                 .bufferedReader()
                 .use { it.readText() }
 
             val localIp = getLocalIp()
             val modifiedScript = script.replace("REPLACE_WITH_LOCAL_IP", localIp)
 
-            Log.d(tag, "Serving init_polling.lua with IP: $localIp")
+            Log.d(tag, "Serving init.lua with IP: $localIp")
 
             newResponse(Response.Status.OK, "text/plain; charset=utf-8", modifiedScript)
                 .apply {
@@ -111,7 +111,7 @@ class PollingHttpServer(
                     addHeader("Cache-Control", "no-cache")
                 }
         } catch (e: Exception) {
-            Log.e(tag, "Failed to read init_polling.lua", e)
+            Log.e(tag, "Failed to read init.lua", e)
             newError(Response.Status.INTERNAL_ERROR, "Failed to load init script")
         }
     }
