@@ -420,7 +420,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
       <div class="view hidden" id="VG">
         <div class="stw">
           <div class="stt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>General</div>
-          <div class="sti"><div class="stin"><div class="stn">Copy Loadstring</div><div class="std">Copia o loadstring para o clipboard.</div></div><button class="stb" onclick="copyLoadstring()">Copy</button></div>
+          <div class="sti"><div class="stin"><div class="stn">Copy Loadstring</div><div class="std">Copy the loadstring to the clipboard.</div></div><button class="stb" onclick="copyLoadstring()">Copy</button></div>
           <div class="sti"><div class="stin"><div class="stn">Reset State</div><div class="std">Clears all local AWP data.</div></div><button class="stb" onclick="doResetState()">Reset</button></div>
           <div class="sti"><div class="stin"><div class="stn">Spoof HWID</div><div class="std">Hooks RbxAnalyticsService to return a fake HWID.</div></div><button class="stb red" onclick="doSpoofHwid()">Spoof</button></div>
           <div class="sti"><div class="stin"><div class="stn">Autoexec</div><div class="std">Run scripts in autoexec folder on attach.</div></div><button class="stb" id="aeBtn" onclick="toggleAutoexec()">Enable</button></div>
@@ -431,7 +431,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
           <div class="stt" style="margin-top:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Window Size</div>
           <div class="sti"><div class="stin"><div class="stn">Width: <span id="szWlbl">640</span>dp</div><div class="std"><input type="range" id="szW" min="280" max="900" value="640" class="sz-slider" oninput="onSzW(this.value)"></div></div></div>
           <div class="sti"><div class="stin"><div class="stn">Height: <span id="szHlbl">480</span>dp</div><div class="std"><input type="range" id="szH" min="220" max="700" value="480" class="sz-slider" oninput="onSzH(this.value)"></div></div></div>
-          <div class="sti"><div class="stin"><div class="stn">Apply Size</div><div class="std">Aplica o tamanho definido acima.</div></div><button class="stb" onclick="applySize()">Apply</button></div>
+          <div class="sti"><div class="stin"><div class="stn">Apply Size</div><div class="std">Apply the size defined above.</div></div><button class="stb" onclick="applySize()">Apply</button></div>
         </div>
       </div>
 
@@ -457,7 +457,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
           <div class="acc-hero">
             <div class="acc-av" id="accAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <div class="acc-name" id="accName">Non-injected AWP</div>
-            <div class="acc-sub" id="accSub">Execute o loadstring para carregar</div>
+            <div class="acc-sub" id="accSub">Inject AWP to load information.</div>
           </div>
           <div id="accInfo">
             <div class="acc-loading" id="accLoad" style="display:none"><div class="sp" style="width:16px;height:16px;margin:0 auto 6px"></div>Loading...</div>
@@ -1034,11 +1034,9 @@ document.addEventListener('click',function(e){if(!e.target.closest('#TM')){docum
 
 function doResetState(){
   wfiles=[
-    {name:'dex++.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()'},
-    {name:'GrabPart.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/dthecoolest/GrabPart/main/GrabPart.lua"))()'},
+    {name:'dex.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()'},
     {name:'InfiniteYield.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()'},
     {name:'output-test.lua',content:'print("Hello from AWP!")'},
-    {name:'Telekinesis.lua',content:'loadstring(game:HttpGet("https://raw.githubusercontent.com/0zark/scripts/main/Telekinesis.lua"))()'},
   ];
   renderWs();persistWorkspace();if(nativeAvail())AwpNative.clearAppState();toast('State reset');log('sys','State reset');
 }
