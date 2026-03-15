@@ -11,8 +11,6 @@ local Players = game:GetService("Players")
 local serverUrl = "http://REPLACE_WITH_LOCAL_IP:8080"
 local sessionId = HttpService:GenerateGUID(false)
 local connected = false
-local retryDelay = 0.5
-local maxRetryDelay = 5
 
 warn("[AWP] =============================")
 warn("[AWP] Starting AWP HTTP Polling")
@@ -33,60 +31,40 @@ pcall(function()
 end)
 warn("[AWP] UserId: " .. tostring(userId))
 
-local function safeHttpGet(url)
+-- Usa request() do executor igual ReChat faz, nao HttpService
+-- request() nao tem as restricoes do HttpService para IPs locais na rede
+local function httpRequest(url, method, body)
     local ok, result = pcall(function()
-        return HttpService:GetAsync(url, true)
+        return request({
+            Url = url,
+            Method = method or "GET",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = body and HttpService:JSONEncode(body) or nil
+        })
     end)
-    if ok then
+    if ok and result and (result.StatusCode == 200 or result.Success) then
         local decOk, decoded = pcall(function()
-            return HttpService:JSONDecode(result)
+            return HttpService:JSONDecode(result.Body)
         end)
-        if decOk then
-            return true, decoded
-        end
-        return false, nil
+        if decOk then return true, decoded end
+        return true, result.Body
     end
     return false, nil
 end
 
-local function safeHttpPost(url, body)
-    local ok, result = pcall(function()
-        return HttpService:PostAsync(
-            url,
-            HttpService:JSONEncode(body),
-            Enum.HttpContentType.ApplicationJson,
-            true
-        )
-    end)
-    if ok then
-        return true, result
-    end
-    return false, nil
+local function httpGet(endpoint)
+    return httpRequest(serverUrl .. endpoint, "GET", nil)
 end
 
-local function sendReady()
-    warn("[AWP] Sending ready signal...")
-    local ok, _ = safeHttpPost(serverUrl .. "/session/ready", {
-        sessionId = sessionId,
-        executor = execName,
-        userId = userId
-    })
-    if ok then
-        warn("[AWP] Ready signal sent OK")
-    else
-        warn("[AWP] Ready signal failed")
-    end
-end
-
-local function ping()
-    local ok, _ = safeHttpGet(serverUrl .. "/ping")
-    return ok
+local function httpPost(endpoint, body)
+    return httpRequest(serverUrl .. endpoint, "POST", body)
 end
 
 warn("[AWP] Testing server connection...")
 local pingOk = false
 for i = 1, 5 do
-    if ping() then
+    local ok, _ = httpGet("/ping")
+    if ok then
         pingOk = true
         warn("[AWP] Server reachable!")
         break
@@ -97,25 +75,33 @@ end
 
 if not pingOk then
     warn("[AWP] ERROR: Cannot reach server at " .. serverUrl)
-    warn("[AWP] Make sure AWP app is running and on same network")
+    warn("[AWP] Make sure AWP app is running and on same Wi-Fi network")
     _G.__AWP_POLLING_ACTIVE = false
     return
 end
 
+local function sendReady()
+    warn("[AWP] Sending ready signal...")
+    local ok, _ = httpPost("/session/ready", {
+        sessionId = sessionId,
+        executor = execName,
+        userId = userId
+    })
+    warn(ok and "[AWP] Ready signal sent OK" or "[AWP] Ready signal failed")
+end
+
 local function poll()
-    local currentDelay = retryDelay
+    local currentDelay = 0.5
     while _G.__AWP_POLLING_ACTIVE do
-        local ok, data = safeHttpGet(serverUrl .. "/session/poll?id=" .. sessionId)
+        local ok, data = httpGet("/session/poll?id=" .. sessionId)
 
         if ok and data then
-            currentDelay = retryDelay
-
+            currentDelay = 0.5
             if not connected then
                 connected = true
                 warn("[AWP] Connected to AWP server!")
                 sendReady()
             end
-
             if data.scripts and #data.scripts > 0 then
                 warn("[AWP] Received " .. #data.scripts .. " script(s)")
                 for i, scriptData in ipairs(data.scripts) do
@@ -138,7 +124,7 @@ local function poll()
                 warn("[AWP] Lost connection, retrying...")
                 connected = false
             end
-            currentDelay = math.min(currentDelay * 1.5, maxRetryDelay)
+            currentDelay = math.min(currentDelay * 1.5, 5)
         end
 
         task.wait(currentDelay)
