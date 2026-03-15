@@ -256,6 +256,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 .sp{width:22px;height:22px;border:2px solid var(--b2);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .lt{font-size:12px;color:var(--t3)}
+.sz-slider{width:100%;accent-color:var(--blue);cursor:pointer;margin-top:4px}
 </style>
 </head>
 <body>
@@ -396,6 +397,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
           <div class="sti"><div class="stin"><div class="stn">Scripts folder</div><div class="std" id="scriptsPathLbl">/sdcard/Delta/Scripts</div></div><button class="stb" onclick="openFolder(scriptsPath)">Open</button></div>
           <div class="sti"><div class="stin"><div class="stn">Autoexecute folder</div><div class="std" id="autoexecPathLbl">/sdcard/Delta/Autoexecute</div></div><button class="stb" onclick="openFolder(autoexecPath)">Open</button></div>
           <div class="sti"><div class="stin"><div class="stn">Reload Scripts</div><div class="std">Reload from executor scripts folder.</div></div><button class="stb" onclick="reloadWs()">Reload</button></div>
+          <div class="stt" style="margin-top:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Window Size</div>
+          <div class="sti"><div class="stin"><div class="stn">Width: <span id="szWlbl">640</span>dp</div><div class="std"><input type="range" id="szW" min="280" max="900" value="640" class="sz-slider" oninput="onSzW(this.value)"></div></div></div>
+          <div class="sti"><div class="stin"><div class="stn">Height: <span id="szHlbl">480</span>dp</div><div class="std"><input type="range" id="szH" min="220" max="700" value="480" class="sz-slider" oninput="onSzH(this.value)"></div></div></div>
+          <div class="sti"><div class="stin"><div class="stn">Apply Size</div><div class="std">Aplica o tamanho definido acima.</div></div><button class="stb" onclick="applySize()">Apply</button></div>
         </div>
       </div>
 
@@ -403,12 +408,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
         <div class="accw">
           <div class="acc-hero">
             <div class="acc-av" id="accAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            <div class="acc-name" id="accName">—</div>
-            <div class="acc-sub" id="accSub">Conecte o executor para carregar</div>
-          </div>
-          <div class="acc-search">
-            <input class="acc-inp" id="accInp" type="text" placeholder="Username ou User ID" maxlength="50" onkeydown="if(event.key==='Enter')fetchUser()">
-            <button class="acc-sbtn" onclick="fetchUser()">Search</button>
+            <div class="acc-name" id="accName">Non-injected AWP</div>
+            <div class="acc-sub" id="accSub">Execute o loadstring para carregar</div>
           </div>
           <div id="accInfo">
             <div class="acc-loading" id="accLoad" style="display:none"><div class="sp" style="width:16px;height:16px;margin:0 auto 6px"></div>Loading...</div>
@@ -666,7 +667,7 @@ function newTab(content){
 }
 function switchTab(id){
   if(id===aid)return;saveActive();aid=id;
-  var t=getT(id);if(t&&ed)ed.setValue(t.content);renderTabs();ed&&ed.focus();
+  var t=getT(id);if(t&&ed)ed.setValue(t.content);renderTabs();
 }
 function closeTab(id,e){
   if(e){e.preventDefault();e.stopPropagation();}
@@ -793,6 +794,15 @@ function fetchUser(){
     .then(function(d){document.getElementById('accLoad').style.display='none';if(!d.success)throw new Error(d.error||'Not found');applyAccountUI(d);})
     .catch(function(err){document.getElementById('accLoad').style.display='none';var e=document.getElementById('accErr');e.textContent=err.message;e.style.display='block';});
 }
+function onSzW(v){document.getElementById('szWlbl').textContent=v;}
+function onSzH(v){document.getElementById('szHlbl').textContent=v;}
+function applySize(){
+  var w=parseInt(document.getElementById('szW').value);
+  var h=parseInt(document.getElementById('szH').value);
+  if(nativeAvail())AwpNative.resizeWindow(w,h);
+  toast('Size: '+w+'×'+h);
+}
+
 function applyAccountUI(d){
   document.getElementById('accName').textContent=d.displayName+' (@'+d.username+')';
   document.getElementById('accSub').textContent='ID: '+d.userId;
@@ -842,8 +852,25 @@ function doResetState(){
 }
 function doSpoofHwid(){
   if(!conn){notify('Connect executor first','err');return;}
-  var fakeId=Math.random().toString(36).substr(2,8).toUpperCase()+'-'+Math.random().toString(36).substr(2,8).toUpperCase()+'-'+Date.now().toString(16).toUpperCase();
-  var script='local old\nold=hookmetamethod(game,"__namecall",function(self,...)\nif self==game:GetService("RbxAnalyticsService") and getnamecallmethod()=="GetClientId" then return "'+fakeId+'" end\nreturn old(self,...)\nend)\nprint("[AWP] HWID spoofed -> '+fakeId+'")\n';
+  var fakeId=[
+    Math.random().toString(36).substr(2,8),
+    Math.random().toString(36).substr(2,4),
+    Math.random().toString(36).substr(2,4),
+    Math.random().toString(36).substr(2,4),
+    Math.random().toString(36).substr(2,12)
+  ].join('-').toUpperCase();
+  var script=[
+    'local svc=game:GetService("RbxAnalyticsService")',
+    'local fakeId="'+fakeId+'"',
+    'local old',
+    'old=hookmetamethod(game,"__namecall",newcclosure(function(self,...)',
+    '  if rawequal(self,svc) and getnamecallmethod()=="GetClientId" then',
+    '    return fakeId',
+    '  end',
+    '  return old(self,...)',
+    'end))',
+    'print("[AWP] HWID spoofed -> "..fakeId)',
+  ].join('\n');
   if(nativeAvail())AwpNative.executeScript(script);log('ok','HWID → '+fakeId);notify('HWID spoofed','ok');
 }
 function toggleAutoexec(){autoexecOn=!autoexecOn;document.getElementById('aeBtn').textContent=autoexecOn?'Disable':'Enable';document.getElementById('aeBtn').className='stb'+(autoexecOn?' on':'');if(nativeAvail())AwpNative.setAutoexec(autoexecOn);toast('Autoexec '+(autoexecOn?'enabled':'disabled'));}
@@ -862,6 +889,22 @@ window.addEventListener('awp:status',function(e){
   log(conn?'ok':'err',conn?'Executor connected':'Executor disconnected');
   notify(conn?'Executor connected':'Executor disconnected', conn?'ok':'err');
   if(!conn)document.getElementById('instlbl').textContent='Copy Loadstring';
+  if(conn){
+    var cleanScript=[
+      'local protectgui=protectgui or (syn and syn.protect_gui) or function() end',
+      'local gethui=gethui or function() return cloneref(game:GetService("CoreGui")) end',
+      'task.spawn(function()',
+      '  task.wait(2)',
+      '  local hui=gethui()',
+      '  for _,child in ipairs(hui:GetDescendants()) do',
+      '    if child.Name=="Executor" then',
+      '      pcall(function() child.Parent:Destroy() end)',
+      '    end',
+      '  end',
+      'end)',
+    ].join('\n');
+    if(nativeAvail())AwpNative.executeScript(cleanScript);
+  }
   if(conn&&autoexecOn)runAutoexec();
   if(conn)reloadWs();
 });
