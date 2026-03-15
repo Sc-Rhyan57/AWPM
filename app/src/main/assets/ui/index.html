@@ -931,22 +931,24 @@ function renderHub(scripts){
     var desc=s.features||s.description||'';
     var verified=s.verified?'✓ ':'';
     var patched=s.isPatched?' · Patched':'';
+    var slug=escAttr(s.slug||s._id);
+    var stitle=escAttr(s.title||'script');
     card.innerHTML=
-      '<img class="hub-img" src="'+imgSrc+'" onerror="this.style.display='none'">'
+      '<img class="hub-img" src="'+imgSrc+'" onerror="this.style.display=\'none\'">'
       +'<div class="hub-info">'
         +'<div class="hub-title">'+verified+escHtml(s.title||'')+'</div>'
         +'<div class="hub-game">'+escHtml(gameName)+patched+'</div>'
         +(desc?'<div class="hub-desc">'+escHtml(desc.substring(0,80))+'</div>':'')
         +'<div class="hub-meta">'
-          +'<span>👁 '+views+'</span>'
-          +(likes?'<span>♥ '+likes+'</span>':'')
-          +(s.key?'<span style="color:var(--yellow)">🔑 Key</span>':'')
+          +'<span>&#128065; '+views+'</span>'
+          +(likes?'<span>&#9825; '+likes+'</span>':'')
+          +(s.key?'<span style="color:var(--yellow)">Key</span>':'')
         +'</div>'
       +'</div>'
       +'<div class="hub-acts">'
-        +'<button class="hub-btn exec" onclick="hubExec(''+escAttr(s.slug||s._id)+'',this)">Execute</button>'
-        +'<button class="hub-btn" onclick="hubSaveWs(''+escAttr(s.title||'script')+'',''+escAttr(s.slug||s._id)+'',this)">Save</button>'
-        +'<button class="hub-btn" onclick="hubOpenTab(''+escAttr(s.title||'script')+'',''+escAttr(s.slug||s._id)+'',this)">Open</button>'
+        +'<button class="hub-btn exec" onclick="hubExec(\''+slug+'\',this)">Execute</button>'
+        +'<button class="hub-btn" onclick="hubSaveWs(\''+stitle+'\',\''+slug+'\',this)">Save</button>'
+        +'<button class="hub-btn" onclick="hubOpenTab(\''+stitle+'\',\''+slug+'\',this)">Open</button>'
       +'</div>';
     list.appendChild(card);
   });
