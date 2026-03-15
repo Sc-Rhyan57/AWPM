@@ -1,9 +1,16 @@
+if _G.__AWP_WS_ACTIVE then
+    return
+end
+_G.__AWP_WS_ACTIVE = true
+
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
 local ws = nil
 local connected = false
 local connecting = false
+local reconnectAttempts = 0
+local maxReconnectDelay = 30
 
 local execName = "Unknown"
 pcall(function()
@@ -90,10 +97,22 @@ pcall(function()
     end)
 end)
 
+local function cleanup()
+    if ws then
+        pcall(function() ws:Close() end)
+        ws = nil
+    end
+    connected = false
+    connecting = false
+end
+
 local function connect()
     if connecting or connected then return end
     connecting = true
-    ws = nil
+    
+    cleanup()
+    
+    task.wait(0.5)
 
     local ok, err = pcall(function()
         ws = WebSocket.connect("ws://127.0.0.1:9999")
@@ -103,13 +122,19 @@ local function connect()
         connecting = false
         connected = false
         ws = nil
+        reconnectAttempts = reconnectAttempts + 1
         return
     end
 
+    local closeHandled = false
+
     ws.OnClose:Connect(function()
+        if closeHandled then return end
+        closeHandled = true
         connected = false
         connecting = false
         ws = nil
+        reconnectAttempts = reconnectAttempts + 1
     end)
 
     ws.OnMessage:Connect(function(msg)
@@ -126,30 +151,28 @@ local function connect()
         end
     end)
 
-    task.wait(0.3)
+    task.wait(1.0)
 
-    connected = true
-    connecting = false
+    if ws and not closeHandled then
+        connected = true
+        connecting = false
+        reconnectAttempts = 0
 
-    send("__ready")
-
-    task.wait(0.1)
-
-    send("__meta:" .. metaPayload)
+        send("__ready")
+        task.wait(0.2)
+        send("__meta:" .. metaPayload)
+    end
 end
 
 task.spawn(function()
-    local retryDelay = 3
-    while true do
+    while _G.__AWP_WS_ACTIVE do
         if not connected and not connecting then
+            local delay = math.min(3 + (reconnectAttempts * 2), maxReconnectDelay)
             connect()
-            if connected then
-                retryDelay = 3
-            else
-                task.wait(retryDelay)
-                retryDelay = math.min(retryDelay + 2, 15)
+            if not connected then
+                task.wait(delay)
             end
         end
-        task.wait(1)
+        task.wait(2)
     end
 end)
