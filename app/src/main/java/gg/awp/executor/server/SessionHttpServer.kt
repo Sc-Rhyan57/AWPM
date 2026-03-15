@@ -4,12 +4,27 @@ import android.content.Context
 import android.util.Log
 import fi.iki.elonen.NanoHTTPD
 import java.io.IOException
+import java.net.NetworkInterface
 
 class SessionHttpServer(
     private val context: Context
 ) : NanoHTTPD(8080) {
 
     private val tag = "SessionHttpServer"
+
+    private fun getLocalIp(): String {
+        try {
+            val ifaces = NetworkInterface.getNetworkInterfaces() ?: return "127.0.0.1"
+            for (iface in ifaces) {
+                for (addr in iface.inetAddresses) {
+                    if (!addr.isLoopbackAddress && addr.hostAddress?.contains('.') == true) {
+                        return addr.hostAddress ?: "127.0.0.1"
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+        return "127.0.0.1"
+    }
 
     override fun serve(session: IHTTPSession): Response {
         val uri = session.uri
@@ -38,10 +53,15 @@ class SessionHttpServer(
                 .bufferedReader()
                 .use { it.readText() }
 
+            val localIp = getLocalIp()
+            val modifiedScript = script.replace("REPLACE_WITH_LOCAL_IP", localIp)
+
+            Log.d(tag, "Serving init.lua with IP: $localIp")
+
             val response = newFixedLengthResponse(
                 Response.Status.OK,
                 "text/plain; charset=utf-8",
-                script
+                modifiedScript
             )
             response.addHeader("Access-Control-Allow-Origin", "*")
             response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate")
