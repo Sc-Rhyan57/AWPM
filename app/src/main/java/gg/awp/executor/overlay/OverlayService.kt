@@ -187,7 +187,8 @@ class OverlayService : Service() {
             overlayW, overlayH, type,
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -206,9 +207,8 @@ class OverlayService : Service() {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
-            }
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            keepScreenOn = true
         }
 
         setupWebView()
@@ -232,10 +232,17 @@ class OverlayService : Service() {
             cacheMode = WebSettings.LOAD_NO_CACHE
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             setSupportZoom(false); builtInZoomControls = false; displayZoomControls = false
+            mediaPlaybackRequiresUserGesture = false
         }
         wv.webChromeClient = WebChromeClient()
-        wv.webViewClient = WebViewClient()
+        wv.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                wv.resumeTimers()
+            }
+        }
         wv.addJavascriptInterface(Bridge(), "AwpNative")
+        wv.resumeTimers()
         wv.loadUrl("file:///android_asset/ui/index.html")
     }
 
@@ -404,6 +411,7 @@ class OverlayService : Service() {
     override fun onDestroy() {
         running = false
         super.onDestroy()
+        wv.pauseTimers()
         try { wm.removeView(overlayView) } catch (_: Exception) {}
         model.stop()
     }
