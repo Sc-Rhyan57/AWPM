@@ -350,6 +350,16 @@ class OverlayService : Service() {
         @JavascriptInterface fun setAutoexec(@Suppress("UNUSED_PARAMETER") on: Boolean) {}
         @JavascriptInterface fun clearAppState() {}
 
+        @JavascriptInterface fun resizeWindow(wDp: Int, hDp: Int) {
+            wv.post {
+                val p = params ?: return@post
+                val (sw, sh) = getScreenSize()
+                p.width = dpToPx(wDp).coerceIn(dpToPx(280), sw)
+                p.height = dpToPx(hDp).coerceIn(dpToPx(220), sh)
+                try { wm.updateViewLayout(overlayView, p) } catch (_: Exception) {}
+            }
+        }
+
         @JavascriptInterface fun getLoadstring(): String = buildLoadstring()
         @JavascriptInterface fun getDetectedExecutor(): String = detectedExecutorName
         @JavascriptInterface fun getScriptsPath(): String = detectedScriptsPath
@@ -397,13 +407,13 @@ class OverlayService : Service() {
         )
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             Notification.Builder(this, NOTIF_CHANNEL)
-                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
+                .setContentTitle("AWP.GG: By Rhyan57").setContentText("Tap to show")
                 .setSmallIcon(android.R.drawable.ic_menu_view)
                 .setContentIntent(showIntent).setOngoing(true).build()
         else {
             @Suppress("DEPRECATION")
             Notification.Builder(this)
-                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
+                .setContentTitle("AWP.GG: By Rhyan57").setContentText("Tap to show")
                 .setSmallIcon(android.R.drawable.ic_menu_view).setOngoing(true).build()
         }
     }
