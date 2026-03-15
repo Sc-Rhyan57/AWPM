@@ -72,6 +72,12 @@ class OverlayService : Service() {
     private var resizeTouchX = 0f; private var resizeTouchY = 0f
     private var isResizing = false
 
+    private var fabView: FrameLayout? = null
+    private var fabParams: WindowManager.LayoutParams? = null
+    private var fabInitialX = 0; private var fabInitialY = 0
+    private var fabTouchX = 0f; private var fabTouchY = 0f
+    private var fabMoved = false
+
     private var detectedExecutorName = "Unknown"
     private var detectedScriptsPath = ""
     private var detectedAutoexecPath = ""
@@ -218,11 +224,92 @@ class OverlayService : Service() {
         overlayView.addView(wv)
         setupDrag()
         wm.addView(overlayView, params)
+        setupFab()
         startForeground(NOTIF_ID, buildNotification())
         observeModel()
         detectExecutor()
         writeAutoexecSession()
         copyToClipboard()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupFab() {
+        val (screenW, screenH) = getScreenSize()
+        val sizePx = dpToPx(44)
+        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        fabParams = WindowManager.LayoutParams(
+            sizePx, sizePx, type,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = screenW - sizePx - dpToPx(8)
+            y = screenH / 3
+        }
+
+        val btn = android.widget.ImageView(this).apply {
+            setImageResource(android.R.drawable.ic_menu_view)
+            setColorFilter(android.graphics.Color.parseColor("#888888"))
+            scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+            setPadding(dpToPx(10), dpToPx(10), dpToPx(10), dpToPx(10))
+        }
+
+        fabView = FrameLayout(this).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(android.graphics.Color.parseColor("#E6141414"))
+                setStroke(dpToPx(1), android.graphics.Color.parseColor("#662c2c2c"))
+            }
+            elevation = dpToPx(4).toFloat()
+            addView(btn)
+        }
+
+        fabView!!.setOnTouchListener { _, event ->
+            val fp = fabParams ?: return@setOnTouchListener false
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    fabInitialX = fp.x; fabInitialY = fp.y
+                    fabTouchX = event.rawX; fabTouchY = event.rawY
+                    fabMoved = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = (event.rawX - fabTouchX).toInt()
+                    val dy = (event.rawY - fabTouchY).toInt()
+                    if (kotlin.math.abs(dx) > 6 || kotlin.math.abs(dy) > 6) {
+                        fabMoved = true
+                        fp.x = fabInitialX + dx
+                        fp.y = fabInitialY + dy
+                        try { wm.updateViewLayout(fabView, fp) } catch (_: Exception) {}
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (!fabMoved) toggleOverlay()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        wm.addView(fabView, fabParams)
+    }
+
+    private fun toggleOverlay() {
+        val v = overlayView
+        if (v.visibility == View.VISIBLE) {
+            v.visibility = View.GONE
+        } else {
+            v.visibility = View.VISIBLE
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -330,6 +417,7 @@ class OverlayService : Service() {
         @JavascriptInterface fun isConnected(): Boolean = model.isConnected.value == true
         @JavascriptInterface fun minimize() { wv.post { overlayView.visibility = View.GONE } }
         @JavascriptInterface fun maximize() { wv.post { overlayView.visibility = View.VISIBLE } }
+        @JavascriptInterface fun toggleOverlay() { wv.post { this@OverlayService.toggleOverlay() } }
         @JavascriptInterface fun closeApp() { wv.post { stopSelf() } }
         @JavascriptInterface fun setLocked(on: Boolean) { isLocked = on }
         @JavascriptInterface fun isLocked(): Boolean = isLocked
@@ -407,13 +495,13 @@ class OverlayService : Service() {
         )
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             Notification.Builder(this, NOTIF_CHANNEL)
-                .setContentTitle("AWP.GG: By Rhyan57").setContentText("Tap to show")
+                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
                 .setSmallIcon(android.R.drawable.ic_menu_view)
                 .setContentIntent(showIntent).setOngoing(true).build()
         else {
             @Suppress("DEPRECATION")
             Notification.Builder(this)
-                .setContentTitle("AWP.GG: By Rhyan57").setContentText("Tap to show")
+                .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
                 .setSmallIcon(android.R.drawable.ic_menu_view).setOngoing(true).build()
         }
     }
@@ -428,6 +516,7 @@ class OverlayService : Service() {
         super.onDestroy()
         wv.pauseTimers()
         try { wm.removeView(overlayView) } catch (_: Exception) {}
+        try { wm.removeView(fabView) } catch (_: Exception) {}
         model.stop()
     }
 }
