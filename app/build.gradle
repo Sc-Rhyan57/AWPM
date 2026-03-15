@@ -17,7 +17,7 @@ android {
         release {
             storeFile file('../keystore.jks')
             storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
-            keyAlias 'key0'
+            keyAlias 'astral'
             keyPassword System.getenv('KEY_PASSWORD') ?: ''
         }
     }
