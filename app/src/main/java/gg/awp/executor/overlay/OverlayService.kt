@@ -181,7 +181,10 @@ class OverlayService : Service() {
 
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        else @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
+        else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
 
         params = WindowManager.LayoutParams(
             overlayW, overlayH, type,
@@ -397,10 +400,12 @@ class OverlayService : Service() {
                 .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
                 .setSmallIcon(android.R.drawable.ic_menu_view)
                 .setContentIntent(showIntent).setOngoing(true).build()
-        else @Suppress("DEPRECATION")
+        else {
+            @Suppress("DEPRECATION")
             Notification.Builder(this)
                 .setContentTitle("AWP.GG").setContentText("Toque para mostrar")
                 .setSmallIcon(android.R.drawable.ic_menu_view).setOngoing(true).build()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
