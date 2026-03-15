@@ -17,7 +17,7 @@ class PollingHttpServer(
 ) : NanoHTTPD(8080) {
 
     private val tag = "PollingHttpServer"
-    
+
     data class Session(
         val id: String,
         val scripts: CopyOnWriteArrayList<String> = CopyOnWriteArrayList(),
@@ -25,7 +25,7 @@ class PollingHttpServer(
         var executor: String = "Unknown",
         var userId: Long = 0
     )
-    
+
     private val sessions = ConcurrentHashMap<String, Session>()
     private var activeSessionId: String? = null
 
@@ -71,39 +71,39 @@ class PollingHttpServer(
 
         return when {
             uri == "/session/script" && method == Method.GET -> serveInitScript()
-            
+
             uri.startsWith("/session/poll") && method == Method.GET -> {
-                val params = session.parms
-                val sessionId = params["id"] ?: return newNotFound()
+                val params = session.parameters
+                val sessionId = params["id"]?.firstOrNull() ?: return newNotFound()
                 handlePoll(sessionId)
             }
-            
+
             uri == "/session/ready" && method == Method.POST -> {
                 val body = readBody(session)
                 handleReady(body)
             }
-            
+
             uri == "/session/execute" && method == Method.POST -> {
                 val body = readBody(session)
                 handleExecute(body)
             }
-            
+
             uri == "/ping" && method == Method.GET -> newOk("pong")
-            
+
             else -> newNotFound()
         }
     }
 
     private fun serveInitScript(): Response {
         return try {
-            val script = context.assets.open("init.lua")
+            val script = context.assets.open("init_polling.lua")
                 .bufferedReader()
                 .use { it.readText() }
 
             val localIp = getLocalIp()
             val modifiedScript = script.replace("REPLACE_WITH_LOCAL_IP", localIp)
 
-            Log.d(tag, "Serving init.lua with IP: $localIp")
+            Log.d(tag, "Serving init_polling.lua with IP: $localIp")
 
             newResponse(Response.Status.OK, "text/plain; charset=utf-8", modifiedScript)
                 .apply {
@@ -111,7 +111,7 @@ class PollingHttpServer(
                     addHeader("Cache-Control", "no-cache")
                 }
         } catch (e: Exception) {
-            Log.e(tag, "Failed to read init.lua", e)
+            Log.e(tag, "Failed to read init_polling.lua", e)
             newError(Response.Status.INTERNAL_ERROR, "Failed to load init script")
         }
     }
@@ -151,7 +151,7 @@ class PollingHttpServer(
 
             Log.d(tag, "Session ready: $sessionId (Executor: $executor, User: $userId)")
             onScriptOutput("sys:Executor conectado ($executor)")
-            
+
             val metaJson = JSONObject().apply {
                 put("executor", executor)
                 put("userId", userId)
@@ -169,7 +169,7 @@ class PollingHttpServer(
         return try {
             val json = JSONObject(body)
             val script = json.getString("script")
-            
+
             activeSessionId?.let { sessionId ->
                 sessions[sessionId]?.scripts?.add(script)
                 Log.d(tag, "Queued script for session $sessionId (${script.length} chars)")
