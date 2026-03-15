@@ -11,6 +11,7 @@ local connected = false
 local connecting = false
 local reconnectAttempts = 0
 local maxReconnectDelay = 30
+local serverIp = "REPLACE_WITH_LOCAL_IP"
 
 local execName = "Unknown"
 pcall(function()
@@ -61,7 +62,11 @@ local rawError = error
 
 local function send(msg)
     if ws and connected then
-        pcall(function() ws:Send(msg) end)
+        local ok = pcall(function() ws:Send(msg) end)
+        if not ok then
+            connected = false
+            ws = nil
+        end
     end
 end
 
@@ -112,13 +117,15 @@ local function connect()
     
     cleanup()
     
-    task.wait(0.5)
+    task.wait(1.0)
 
+    local wsUrl = "ws://" .. serverIp .. ":9999"
     local ok, err = pcall(function()
-        ws = WebSocket.connect("ws://127.0.0.1:9999")
+        ws = WebSocket.connect(wsUrl)
     end)
 
     if not ok or not ws then
+        rawPrint("[AWP] Failed to connect: " .. tostring(err))
         connecting = false
         connected = false
         ws = nil
@@ -127,10 +134,12 @@ local function connect()
     end
 
     local closeHandled = false
+    local openConfirmed = false
 
     ws.OnClose:Connect(function()
         if closeHandled then return end
         closeHandled = true
+        rawPrint("[AWP] Connection closed")
         connected = false
         connecting = false
         ws = nil
@@ -138,6 +147,11 @@ local function connect()
     end)
 
     ws.OnMessage:Connect(function(msg)
+        if not openConfirmed then
+            openConfirmed = true
+            rawPrint("[AWP] First message received, connection stable")
+        end
+        
         if msg == "ping" then
             send("pong")
             return
@@ -151,16 +165,20 @@ local function connect()
         end
     end)
 
-    task.wait(1.0)
+    task.wait(2.0)
 
     if ws and not closeHandled then
         connected = true
         connecting = false
         reconnectAttempts = 0
+        rawPrint("[AWP] Connected to " .. wsUrl)
 
         send("__ready")
-        task.wait(0.2)
+        task.wait(0.3)
         send("__meta:" .. metaPayload)
+    else
+        rawPrint("[AWP] Connection failed during handshake")
+        cleanup()
     end
 end
 
@@ -168,11 +186,12 @@ task.spawn(function()
     while _G.__AWP_WS_ACTIVE do
         if not connected and not connecting then
             local delay = math.min(3 + (reconnectAttempts * 2), maxReconnectDelay)
+            rawPrint("[AWP] Attempting connection (attempt " .. (reconnectAttempts + 1) .. ")")
             connect()
             if not connected then
                 task.wait(delay)
             end
         end
-        task.wait(2)
+        task.wait(3)
     end
 end)
