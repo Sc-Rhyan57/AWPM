@@ -12,7 +12,6 @@ import org.java_websocket.protocols.Protocol
 import org.java_websocket.server.WebSocketServer
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.util.Collections
 import java.util.Timer
 import java.util.TimerTask
 
@@ -35,15 +34,23 @@ class AwpWebSocketServer(
 
     @Volatile private var activeClient: WebSocket? = null
     @Volatile private var heartbeatTimer: Timer? = null
+    @Volatile private var lastPongTime: Long = 0
 
     init {
         isReuseAddr = true
         isTcpNoDelay = true
-        connectionLostTimeout = 0
+        connectionLostTimeout = 60
     }
 
     override fun onOpen(conn: WebSocket, handshake: ClientHandshake) {
+        activeClient?.let { old ->
+            if (old !== conn && old.isOpen) {
+                try { old.close(1000, "New connection") } catch (_: Exception) {}
+            }
+        }
+        
         activeClient = conn
+        lastPongTime = System.currentTimeMillis()
         startHeartbeat()
         onClientConnected()
         Log.d(tag, "onOpen: ${conn.remoteSocketAddress}")
@@ -60,7 +67,9 @@ class AwpWebSocketServer(
 
     override fun onMessage(conn: WebSocket, message: String) {
         when {
-            message == "pong" -> {}
+            message == "pong" -> {
+                lastPongTime = System.currentTimeMillis()
+            }
             message == "__ready" -> {
                 Log.d(tag, "executor ready")
                 onScriptOutput("sys:Executor conectado")
@@ -95,17 +104,27 @@ class AwpWebSocketServer(
 
     private fun startHeartbeat() {
         stopHeartbeat()
+        lastPongTime = System.currentTimeMillis()
         heartbeatTimer = Timer("awp-hb", true).apply {
             scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     val c = activeClient
                     if (c != null && c.isOpen) {
-                        try { c.send("ping") } catch (_: Exception) { stopHeartbeat() }
+                        val timeSinceLastPong = System.currentTimeMillis() - lastPongTime
+                        if (timeSinceLastPong > 45_000L) {
+                            Log.w(tag, "No pong received in 45s, closing connection")
+                            try { c.close(1000, "Timeout") } catch (_: Exception) {}
+                            stopHeartbeat()
+                        } else {
+                            try { c.send("ping") } catch (_: Exception) { 
+                                stopHeartbeat()
+                            }
+                        }
                     } else {
                         stopHeartbeat()
                     }
                 }
-            }, 15_000L, 15_000L)
+            }, 20_000L, 20_000L)
         }
     }
 
