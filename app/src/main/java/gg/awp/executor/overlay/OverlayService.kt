@@ -141,9 +141,15 @@ class OverlayService : Service() {
         } catch (_: Exception) {}
     }
 
-    private fun getAwpWorkspaceDir(): File =
+    private fun getAwpRootDir(): File =
         File(Environment.getExternalStorageDirectory(), "Delta/workspace/AWPM")
             .also { if (!it.exists()) it.mkdirs() }
+
+    private fun getAwpScriptsDir(): File =
+        File(getAwpRootDir(), "scripts").also { if (!it.exists()) it.mkdirs() }
+
+    private fun getAwpLogsDir(): File =
+        File(getAwpRootDir(), "logs").also { if (!it.exists()) it.mkdirs() }
 
     private fun readLogcat(): String {
         return try {
@@ -164,10 +170,8 @@ class OverlayService : Service() {
             shape = GradientDrawable.RECTANGLE
             setColor(Color.parseColor("#0d0d0d"))
             cornerRadii = floatArrayOf(
-                cornerPx, cornerPx,
-                cornerPx, cornerPx,
-                cornerPx, cornerPx,
-                cornerPx, cornerPx
+                cornerPx, cornerPx, cornerPx, cornerPx,
+                cornerPx, cornerPx, cornerPx, cornerPx
             )
         }
     }
@@ -278,24 +282,19 @@ class OverlayService : Service() {
                 MotionEvent.ACTION_DOWN -> {
                     fabInitialX = fp.x; fabInitialY = fp.y
                     fabTouchX = event.rawX; fabTouchY = event.rawY
-                    fabMoved = false
-                    true
+                    fabMoved = false; true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = (event.rawX - fabTouchX).toInt()
                     val dy = (event.rawY - fabTouchY).toInt()
                     if (kotlin.math.abs(dx) > 6 || kotlin.math.abs(dy) > 6) {
                         fabMoved = true
-                        fp.x = fabInitialX + dx
-                        fp.y = fabInitialY + dy
+                        fp.x = fabInitialX + dx; fp.y = fabInitialY + dy
                         try { wm.updateViewLayout(fabView, fp) } catch (_: Exception) {}
                     }
                     true
                 }
-                MotionEvent.ACTION_UP -> {
-                    if (!fabMoved) toggleOverlay()
-                    true
-                }
+                MotionEvent.ACTION_UP -> { if (!fabMoved) toggleOverlay(); true }
                 else -> false
             }
         }
@@ -304,12 +303,7 @@ class OverlayService : Service() {
     }
 
     private fun toggleOverlay() {
-        val v = overlayView
-        if (v.visibility == View.VISIBLE) {
-            v.visibility = View.GONE
-        } else {
-            v.visibility = View.VISIBLE
-        }
+        overlayView.visibility = if (overlayView.visibility == View.VISIBLE) View.GONE else View.VISIBLE
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -460,11 +454,24 @@ class OverlayService : Service() {
             readFolder(detectedAutoexecPath.ifEmpty { "/sdcard/Delta/Autoexecute" })
 
         @JavascriptInterface fun saveWorkspaceFile(name: String, content: String) {
-            try { File(getAwpWorkspaceDir(), name).writeText(content) } catch (_: Exception) {}
+            try {
+                val dir = if (name.endsWith(".txt") && name.startsWith("awp_logs")) getAwpLogsDir()
+                          else if (name.startsWith("__awp_")) getAwpRootDir()
+                          else getAwpScriptsDir()
+                File(dir, name).writeText(content)
+            } catch (_: Exception) {}
         }
 
-        @JavascriptInterface fun readWorkspaceFile(name: String): String? =
-            try { File(getAwpWorkspaceDir(), name).takeIf { it.exists() }?.readText() } catch (_: Exception) { null }
+        @JavascriptInterface fun readWorkspaceFile(name: String): String? {
+            return try {
+                val candidates = listOf(
+                    File(getAwpRootDir(), name),
+                    File(getAwpScriptsDir(), name),
+                    File(getAwpLogsDir(), name)
+                )
+                candidates.firstOrNull { it.exists() }?.readText()
+            } catch (_: Exception) { null }
+        }
 
         @JavascriptInterface fun getLogs(): String = readLogcat()
 
