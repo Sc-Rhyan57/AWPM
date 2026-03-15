@@ -257,6 +257,35 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
 @keyframes sp{to{transform:rotate(360deg)}}
 .lt{font-size:12px;color:var(--t3)}
 .sz-slider{width:100%;accent-color:var(--blue);cursor:pointer;margin-top:4px}
+.hub-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.hub-search{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.hub-inp{flex:1;background:var(--bg2);border:1px solid var(--b2);border-radius:5px;color:var(--t1);font-size:12px;padding:5px 9px;outline:none;transition:border .1s;-webkit-user-select:text;user-select:text}
+.hub-inp:focus{border-color:var(--blue)}
+.hub-inp::placeholder{color:var(--t3)}
+.hub-sbtn{padding:5px 10px;border-radius:5px;background:var(--btn);border:1px solid var(--b2);color:var(--t2);font-size:12px;cursor:pointer;transition:all .1s;white-space:nowrap;flex-shrink:0}
+.hub-sbtn:hover{background:var(--bth);color:var(--t1)}
+.hub-list{flex:1;overflow-y:auto;padding:6px}
+.hub-list::-webkit-scrollbar{width:3px}
+.hub-list::-webkit-scrollbar-thumb{background:var(--b2)}
+.hub-card{display:flex;gap:10px;padding:10px;border-radius:7px;border:1px solid var(--b1);background:var(--bg1);margin-bottom:6px;transition:border .12s}
+.hub-card:hover{border-color:var(--b3)}
+.hub-img{width:56px;height:56px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--bg3)}
+.hub-info{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:3px}
+.hub-title{font-size:12.5px;font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hub-game{font-size:11px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hub-desc{font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hub-meta{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--t3)}
+.hub-acts{display:flex;gap:4px;flex-shrink:0;flex-direction:column;justify-content:center}
+.hub-btn{padding:4px 8px;border-radius:4px;font-size:10.5px;background:var(--btn);border:1px solid var(--b2);color:var(--t2);cursor:pointer;transition:all .1s;white-space:nowrap}
+.hub-btn:hover{background:var(--bth);color:var(--t1)}
+.hub-btn.exec{border-color:#2d5a2d;color:#6dd96d}
+.hub-btn.exec:hover{background:#1a2e1a}
+.hub-empty{padding:20px;text-align:center;color:var(--t3);font-size:12px}
+.hub-pages{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-top:1px solid var(--b1);flex-shrink:0}
+.hub-pgbtn{padding:4px 12px;border-radius:5px;background:var(--btn);border:1px solid var(--b2);color:var(--t2);font-size:11.5px;cursor:pointer;transition:all .1s}
+.hub-pgbtn:hover:not(:disabled){background:var(--bth);color:var(--t1)}
+.hub-pgbtn:disabled{opacity:.3;cursor:not-allowed}
+.hub-pglbl{font-size:11.5px;color:var(--t3)}
 </style>
 </head>
 <body>
@@ -302,6 +331,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Scripting
           </div>
           <div class="ditem" id="dset" onclick="goView('g');tmToggle()">Settings</div>
+          <div class="ditem" id="dhub" onclick="goView('h');tmToggle()">Script Hub</div>
           <div class="ditem" id="dacc" onclick="goView('a');tmToggle()">Account</div>
         </div>
       </div>
@@ -323,6 +353,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
     <div class="sb">
       <button class="sbb active" id="sbs" onclick="goView('s')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
       <button class="sbb" id="sbg" onclick="goView('g')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></button>
+      <button class="sbb" id="sbh" onclick="goView('h')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></button>
       <button class="sbb" id="sba" onclick="goView('a')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
     </div>
     <div class="content">
@@ -401,6 +432,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);font-family:-apple-s
           <div class="sti"><div class="stin"><div class="stn">Width: <span id="szWlbl">640</span>dp</div><div class="std"><input type="range" id="szW" min="280" max="900" value="640" class="sz-slider" oninput="onSzW(this.value)"></div></div></div>
           <div class="sti"><div class="stin"><div class="stn">Height: <span id="szHlbl">480</span>dp</div><div class="std"><input type="range" id="szH" min="220" max="700" value="480" class="sz-slider" oninput="onSzH(this.value)"></div></div></div>
           <div class="sti"><div class="stin"><div class="stn">Apply Size</div><div class="std">Aplica o tamanho definido acima.</div></div><button class="stb" onclick="applySize()">Apply</button></div>
+        </div>
+      </div>
+
+
+      <div class="view hidden" id="VH">
+        <div class="hub-wrap">
+          <div class="hub-search">
+            <input class="hub-inp" id="hubQ" type="text" placeholder="Search scripts..." onkeydown="if(event.key==='Enter')hubSearch()">
+            <button class="hub-sbtn" onclick="hubSearch()">Search</button>
+            <button class="hub-sbtn" onclick="hubLoad(1,'')">Trending</button>
+          </div>
+          <div class="hub-list" id="hubList"><div class="hub-empty">Loading...</div></div>
+          <div class="hub-pages">
+            <button class="hub-pgbtn" id="hubPrev" onclick="hubPrev()" disabled>&#8592;</button>
+            <span class="hub-pglbl" id="hubPglbl">Page 1</span>
+            <button class="hub-pgbtn" id="hubNext" onclick="hubNext()">&#8594;</button>
+          </div>
         </div>
       </div>
 
@@ -590,6 +638,8 @@ require(['vs/editor/editor.main'],function(m){
   });
   loadPersistedState();
   initPaths();
+  loadSettings();
+  runGuiCleanup();
   document.getElementById('ld').classList.add('gone');
   document.getElementById('app').style.display='flex';
 });
@@ -645,6 +695,19 @@ function loadPersistedState(){
   }
   if(!loadedTabs)newTab('-- Welcome to AWP!');
   renderWs();
+}
+function runGuiCleanup(){
+  if(!nativeAvail())return;
+  var cleanScript=[
+    'local protectgui=protectgui or (syn and syn.protect_gui) or function() end',
+    'local gethui=gethui or function() return cloneref(game:GetService("CoreGui")) end',
+    'pcall(function()',
+    '  for _,child in ipairs(gethui():GetDescendants()) do',
+    '    if child.Name=="Executor" then pcall(function() child.Parent:Destroy() end) end',
+    '  end',
+    'end)',
+  ].join('\n');
+  try{AwpNative.executeScript(cleanScript);}catch(e){}
 }
 function initPaths(){
   if(!nativeAvail())return;
@@ -745,7 +808,7 @@ function copyLoadstring(){
 }
 function doAttach(){copyLoadstring();}
 function doReattach(){if(nativeAvail())AwpNative.reattach();notify('Loadstring renewed & copied','ok');log('sys','Loadstring renewed and copied to clipboard');}
-function toggleLock(){locked=!locked;if(nativeAvail())AwpNative.setLocked(locked);document.getElementById('lockBtn').classList.toggle('locked',locked);toast(locked?'Window locked':'Window unlocked');}
+function toggleLock(){locked=!locked;if(nativeAvail())AwpNative.setLocked(locked);document.getElementById('lockBtn').classList.toggle('locked',locked);toast(locked?'Window locked':'Window unlocked');persistSettings();}
 
 function renderWs(){
   var c=document.getElementById('wsf');
@@ -801,6 +864,7 @@ function applySize(){
   var h=parseInt(document.getElementById('szH').value);
   if(nativeAvail())AwpNative.resizeWindow(w,h);
   toast('Size: '+w+'×'+h);
+  persistSettings();
 }
 
 function applyAccountUI(d){
@@ -828,15 +892,141 @@ window.addEventListener('awp:meta',function(e){
   }
 });
 
+var hubPage=1,hubQuery='',hubTotalPages=1;
+function hubLoad(page,q){
+  hubPage=page;hubQuery=q;
+  var list=document.getElementById('hubList');
+  list.innerHTML='<div class="hub-empty"><div class="sp" style="width:16px;height:16px;margin:0 auto 6px"></div>Loading...</div>';
+  var url=q
+    ?'https://scriptblox.com/api/script/search?q='+encodeURIComponent(q)+'&page='+page+'&max=20'
+    :'https://scriptblox.com/api/script/fetch?page='+page+'&max=20';
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var scripts=(d.result&&d.result.scripts)||[];
+      hubTotalPages=d.result&&d.result.totalPages?d.result.totalPages:1;
+      renderHub(scripts);
+      document.getElementById('hubPglbl').textContent='Page '+hubPage+(hubTotalPages>1?' / '+hubTotalPages:'');
+      document.getElementById('hubPrev').disabled=hubPage<=1;
+      document.getElementById('hubNext').disabled=hubPage>=hubTotalPages;
+    })
+    .catch(function(){list.innerHTML='<div class="hub-empty">Failed to load scripts</div>';});
+}
+function hubSearch(){
+  var q=document.getElementById('hubQ').value.trim();
+  hubLoad(1,q);
+}
+function hubPrev(){if(hubPage>1)hubLoad(hubPage-1,hubQuery);}
+function hubNext(){if(hubPage<hubTotalPages)hubLoad(hubPage+1,hubQuery);}
+function renderHub(scripts){
+  var list=document.getElementById('hubList');
+  if(!scripts.length){list.innerHTML='<div class="hub-empty">No scripts found</div>';return;}
+  list.innerHTML='';
+  scripts.forEach(function(s){
+    var card=document.createElement('div');card.className='hub-card';
+    var imgSrc=s.image?'https://scriptblox.com'+s.image:(s.game&&s.game.imageUrl?s.game.imageUrl:'');
+    var views=s.views||0;
+    var likes=s.likes||0;
+    var gameName=(s.game&&s.game.name)||'Universal';
+    var desc=s.features||s.description||'';
+    var verified=s.verified?'✓ ':'';
+    var patched=s.isPatched?' · Patched':'';
+    card.innerHTML=
+      '<img class="hub-img" src="'+imgSrc+'" onerror="this.style.display='none'">'
+      +'<div class="hub-info">'
+        +'<div class="hub-title">'+verified+escHtml(s.title||'')+'</div>'
+        +'<div class="hub-game">'+escHtml(gameName)+patched+'</div>'
+        +(desc?'<div class="hub-desc">'+escHtml(desc.substring(0,80))+'</div>':'')
+        +'<div class="hub-meta">'
+          +'<span>👁 '+views+'</span>'
+          +(likes?'<span>♥ '+likes+'</span>':'')
+          +(s.key?'<span style="color:var(--yellow)">🔑 Key</span>':'')
+        +'</div>'
+      +'</div>'
+      +'<div class="hub-acts">'
+        +'<button class="hub-btn exec" onclick="hubExec(''+escAttr(s.slug||s._id)+'',this)">Execute</button>'
+        +'<button class="hub-btn" onclick="hubSaveWs(''+escAttr(s.title||'script')+'',''+escAttr(s.slug||s._id)+'',this)">Save</button>'
+        +'<button class="hub-btn" onclick="hubOpenTab(''+escAttr(s.title||'script')+'',''+escAttr(s.slug||s._id)+'',this)">Open</button>'
+      +'</div>';
+    list.appendChild(card);
+  });
+}
+function escHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function escAttr(s){return s.replace(/'/g,"\'").replace(/"/g,'&quot;');}
+function hubFetchScript(slug,cb){
+  fetch('https://scriptblox.com/api/script/raw/'+slug)
+    .then(function(r){return r.text();})
+    .then(function(raw){cb(null,raw);})
+    .catch(function(e){cb(e,null);});
+}
+function hubExec(slug,btn){
+  if(!conn){notify('No executor connected','err');return;}
+  var orig=btn.textContent;btn.textContent='...';btn.disabled=true;
+  hubFetchScript(slug,function(err,raw){
+    btn.textContent=orig;btn.disabled=false;
+    if(err||!raw){notify('Failed to fetch script','err');return;}
+    if(nativeAvail())AwpNative.executeScript(raw);
+    notify('Script sent!','ok');log('sys','[Hub] Executed: '+slug);
+  });
+}
+function hubSaveWs(title,slug,btn){
+  var orig=btn.textContent;btn.textContent='...';btn.disabled=true;
+  hubFetchScript(slug,function(err,raw){
+    btn.textContent=orig;btn.disabled=false;
+    if(err||!raw){notify('Failed to fetch script','err');return;}
+    var name=title.replace(/[^a-zA-Z0-9 _-]/g,'').trim()+'.lua';
+    var ex=wfiles.findIndex(function(f){return f.name===name;});
+    if(ex>=0)wfiles[ex].content=raw;else wfiles.push({name:name,content:raw});
+    renderWs();persistWorkspace();
+    if(nativeAvail())AwpNative.saveWorkspaceFile(name,raw);
+    notify('Saved: '+name,'ok');
+  });
+}
+function hubOpenTab(title,slug,btn){
+  var orig=btn.textContent;btn.textContent='...';btn.disabled=true;
+  hubFetchScript(slug,function(err,raw){
+    btn.textContent=orig;btn.disabled=false;
+    if(err||!raw){notify('Failed to fetch script','err');return;}
+    saveActive();var id=gid();
+    tabs.push({id:id,name:title+'.lua',content:raw});
+    aid=id;if(ed)ed.setValue(raw);renderTabs();persistTabs();
+    goView('s');notify('Opened in editor','ok');
+  });
+}
+
+function persistSettings(){
+  if(!nativeAvail())return;
+  try{
+    var st={autoexecOn:autoexecOn,topmostOn:topmostOn,locked:locked,
+      szW:document.getElementById('szW').value,szH:document.getElementById('szH').value};
+    AwpNative.saveWorkspaceFile('__awp_settings.json',JSON.stringify(st));
+  }catch(e){}
+}
+function loadSettings(){
+  if(!nativeAvail())return;
+  try{
+    var raw=AwpNative.readWorkspaceFile('__awp_settings.json');
+    if(!raw)return;
+    var st=JSON.parse(raw);
+    if(st.autoexecOn){autoexecOn=true;document.getElementById('aeBtn').textContent='Disable';document.getElementById('aeBtn').className='stb on';}
+    if(st.topmostOn){topmostOn=true;document.getElementById('tmN').textContent='Topmost: On';document.getElementById('tmB').textContent='Disable';document.getElementById('tmB').className='stb on';if(nativeAvail())AwpNative.setTopmost(true);}
+    if(st.locked){locked=true;document.getElementById('lockBtn').classList.add('locked');if(nativeAvail())AwpNative.setLocked(true);}
+    if(st.szW){document.getElementById('szW').value=st.szW;document.getElementById('szWlbl').textContent=st.szW;}
+    if(st.szH){document.getElementById('szH').value=st.szH;document.getElementById('szHlbl').textContent=st.szH;}
+  }catch(e){}
+}
+
 function goView(v){
-  ['s','g','a'].forEach(function(x){
+  ['s','g','h','a'].forEach(function(x){
     document.getElementById('V'+x.toUpperCase()).className='view'+(v===x?'':' hidden');
     document.getElementById('sb'+x).className='sbb'+(v===x?' active':'');
-    var key={s:'scr',g:'set',a:'acc'}[x];var el=document.getElementById('d'+key);if(el)el.className='ditem'+(v===x?' active':'');
+    var key={s:'scr',g:'set',h:'hub',a:'acc'}[x];var el=document.getElementById('d'+key);if(el)el.className='ditem'+(v===x?' active':'');
   });
-  document.getElementById('tmlbl').textContent={s:'Scripting',g:'Settings',a:'Account'}[v]||'Scripting';
+  document.getElementById('tmlbl').textContent={s:'Scripting',g:'Settings',h:'Script Hub',a:'Account'}[v]||'Scripting';
   if(ed&&v==='s')setTimeout(function(){ed.layout();},50);
+  if(v==='h'&&!hubLoaded){hubLoaded=true;hubLoad(1,'');}
 }
+var hubLoaded=false;
 function tmToggle(){var btn=document.getElementById('TMB'),dd=document.getElementById('TMD');var o=dd.classList.toggle('show');btn.classList.toggle('open',o);}
 document.addEventListener('click',function(e){if(!e.target.closest('#TM')){document.getElementById('TMD').classList.remove('show');document.getElementById('TMB').classList.remove('open');}});
 
@@ -873,8 +1063,8 @@ function doSpoofHwid(){
   ].join('\n');
   if(nativeAvail())AwpNative.executeScript(script);log('ok','HWID → '+fakeId);notify('HWID spoofed','ok');
 }
-function toggleAutoexec(){autoexecOn=!autoexecOn;document.getElementById('aeBtn').textContent=autoexecOn?'Disable':'Enable';document.getElementById('aeBtn').className='stb'+(autoexecOn?' on':'');if(nativeAvail())AwpNative.setAutoexec(autoexecOn);toast('Autoexec '+(autoexecOn?'enabled':'disabled'));}
-function doTopmost(){topmostOn=!topmostOn;document.getElementById('tmN').textContent='Topmost: '+(topmostOn?'On':'Off');document.getElementById('tmB').textContent=topmastOn?'Disable':'Enable';document.getElementById('tmB').className='stb'+(topmostOn?' on':'');if(nativeAvail())AwpNative.setTopmost(topmostOn);toast('Topmost '+(topmostOn?'enabled':'disabled'));}
+function toggleAutoexec(){autoexecOn=!autoexecOn;document.getElementById('aeBtn').textContent=autoexecOn?'Disable':'Enable';document.getElementById('aeBtn').className='stb'+(autoexecOn?' on':'');if(nativeAvail())AwpNative.setAutoexec(autoexecOn);toast('Autoexec '+(autoexecOn?'enabled':'disabled'));persistSettings();}
+function doTopmost(){topmostOn=!topmostOn;document.getElementById('tmN').textContent='Topmost: '+(topmostOn?'On':'Off');document.getElementById('tmB').textContent=topmostOn?'Disable':'Enable';document.getElementById('tmB').className='stb'+(topmostOn?' on':'');if(nativeAvail())AwpNative.setTopmost(topmostOn);toast('Topmost '+(topmostOn?'enabled':'disabled'));persistSettings();}
 function openFolder(path){if(nativeAvail())AwpNative.openFolder(path);else toast(path);}
 function doMin(){if(nativeAvail())AwpNative.minimize();}
 function doMax(){if(nativeAvail())AwpNative.maximize();}
